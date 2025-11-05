@@ -1,0 +1,46 @@
+/* Simple styles for boards and cards */
+body { background: #f8f9fa; }
+.boards-row { display:flex; gap:1rem; align-items:flex-start; }
+.board-column { flex:1; min-height:320px; max-height:80vh; overflow:auto; }
+.board-list { min-height: 50px; }
+.card-item { background:#fff; border-radius:6px; padding:0.6rem; margin-bottom:0.6rem; box-shadow:0 1px 2px rgba(0,0,0,0.05); cursor:grab; }
+.card-item:active { cursor:grabbing; }
+.card-item.dragging { opacity:0.5; }
+.board-column h6 { margin-bottom:0.75rem; }
+#upcoming-list .list-group-item { display:flex; justify-content:space-between; align-items:center; }
+@media (max-width: 767px) {
+  .boards-row { flex-direction: column; }
+}
+
+/* Horizontal gallery styles */
+.horizontal-gallery { gap: 0.75rem; -webkit-overflow-scrolling: touch; }
+.horizontal-gallery .card-item { box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+.horizontal-gallery::-webkit-scrollbar { height:8px; }
+.horizontal-gallery::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius:4px; }
+
+/* Boards gallery grid */
+.boards-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.boards-gallery .card { min-height: 110px; }
+.board-meta { font-size: 0.85rem; color: #6c757d; }
+
+/* Background choice previews inside modal */
+.bg-choice { cursor: pointer; border-radius:6px; display:inline-block; overflow:hidden; border:2px solid transparent; }
+.bg-choice input { display:none; }
+.bg-choice .bg-preview { width:44px; height:44px; display:block; border-radius:4px; }
+.bg-choice input:checked + .bg-preview { outline: 3px solid rgba(13,110,253,0.15); box-shadow:0 0 0 2px rgba(13,110,253,0.12); }
+
+/* Large preview inside modal */
+#bg-preview-large { width:100%; background-size:cover; background-position:center; }
+
+/* Gallery card visuals when background set */
+.boards-gallery .card.text-white { color: #fff; }
+.boards-gallery .card { transition: transform .12s ease, box-shadow .12s ease; }
+.boards-gallery .card:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+
+/* Board detail specific */
+.board-columns { display:flex; gap:1rem; align-items:flex-start; }
+.board-column { flex:1; min-width:240px; max-height:70vh; overflow:auto; }
+.board-column .board-list { min-height:20px; }
+.board-column .card-item { margin-bottom:0.6rem; background:#fff; padding:0.6rem; border-radius:6px; cursor:grab; }
+.board-column .card-item.dragging { opacity:0.5; }
+.board-column.drag-over { outline:2px dashed rgba(0,0,0,0.08); }

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quest Log — Board</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body id="page-board">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <button class="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <a class="navbar-brand fw-bold me-3" href="index.html">Quest Log</a>
+
+      <form class="d-none d-md-flex ms-3 me-3" role="search">
+        <input id="nav-search" class="form-control form-control-sm" type="search" placeholder="Search tasks, boards..." aria-label="Search">
+      </form>
+
+      <div class="d-flex align-items-center">
+        <a href="account.html" class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex justify-content-center align-items-center" title="Account" style="width:38px;height:38px;padding:0;background:#fff">
+          <img src="https://via.placeholder.com/32" alt="avatar" class="rounded-circle" style="width:32px;height:32px;">
+        </a>
+      </div>
+
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
+          <li class="nav-item"><a class="nav-link" href="teams-dashboard.html">Teams</a></li>
+          <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header id="board-header" class="py-3 mb-3" style="background:#f8f9fa">
+    <div class="container d-flex justify-content-between align-items-center">
+      <h2 id="board-title" class="h4 mb-0">Board</h2>
+      <div>
+        <a href="boards.html" class="btn btn-sm btn-outline-secondary">Back to boards</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container" id="board-root">
+    <div class="row g-3">
+      <div class="col-12">
+        <div class="d-flex gap-2 align-items-center mb-2">
+          <div class="small text-muted">Drag cards between lists. Changes saved locally.</div>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <div class="d-flex gap-3 board-columns">
+          <div class="board-column p-2 bg-light rounded" data-col="todo">
+            <h6 class="text-uppercase">To Do</h6>
+            <form class="add-card-form mb-2" data-column="todo">
+              <div class="input-group mb-2">
+                <input class="form-control form-control-sm new-card-title" placeholder="New card title">
+                <button class="btn btn-sm btn-primary" type="submit">Add</button>
+              </div>
+              <input class="form-control form-control-sm new-card-desc" placeholder="Optional description">
+            </form>
+            <div id="col-todo" class="board-list"></div>
+          </div>
+
+          <div class="board-column p-2 bg-light rounded" data-col="inprogress">
+            <h6 class="text-uppercase">In Progress</h6>
+            <form class="add-card-form mb-2" data-column="inprogress">
+              <div class="input-group mb-2">
+                <input class="form-control form-control-sm new-card-title" placeholder="New card title">
+                <button class="btn btn-sm btn-primary" type="submit">Add</button>
+              </div>
+              <input class="form-control form-control-sm new-card-desc" placeholder="Optional description">
+            </form>
+            <div id="col-inprogress" class="board-list"></div>
+          </div>
+
+          <div class="board-column p-2 bg-light rounded" data-col="done">
+            <h6 class="text-uppercase">Done</h6>
+            <form class="add-card-form mb-2" data-column="done">
+              <div class="input-group mb-2">
+                <input class="form-control form-control-sm new-card-title" placeholder="New card title">
+                <button class="btn btn-sm btn-primary" type="submit">Add</button>
+              </div>
+              <input class="form-control form-control-sm new-card-desc" placeholder="Optional description">
+            </form>
+            <div id="col-done" class="board-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="text-center py-3 bg-light mt-4">
+    <div class="container small">Board detail (local demo)</div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
