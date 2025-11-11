@@ -376,6 +376,25 @@
     setupTeamForm();
     renderTeams();
 
+    // Invite modal wiring (teams page)
+    const inviteForm = document.getElementById('invite-form');
+    if (inviteForm) {
+      inviteForm.addEventListener('submit', (ev)=>{
+        ev.preventDefault();
+        const emailInput = document.getElementById('invite-email');
+        const email = emailInput ? (emailInput.value || '').trim() : '';
+        if (!email) { alert('Please enter an email address.'); return; }
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        if (!emailOk) { alert('Please enter a valid email address.'); return; }
+        // Simulate sending invite (no backend) — you could persist invites to localStorage if needed
+        alert('Invitation sent to ' + email);
+        const modalEl = document.getElementById('inviteModal');
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.hide();
+        inviteForm.reset();
+      });
+    }
+
     // If this is a board detail page, initialize board UI
     const params = new URLSearchParams(window.location.search);
     const boardId = params.get('board');
