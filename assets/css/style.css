@@ -1,16 +1,92 @@
-/* Simple styles for boards and cards */
-body { background: #f8f9fa; }
+/* Quest Log — Fantasy theme styles */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Roboto+Slab:wght@300;400&display=swap');
+
+:root{
+  --bg-base: #f4ecdc; /* parchment base */
+  --bg-spot: rgba(228,214,185,0.6);
+  --accent: #8b5e3c; /* warm brown/gold */
+  --accent-dark: #5a3b28;
+  --muted: #6c5b4a;
+  /* stronger, darker ink for better readability */
+  --ink: #222018;
+  /* make card background slightly more solid to improve contrast */
+  --card-bg: #fff8f0;
+}
+
+body{
+  font-family: 'Roboto Slab', Georgia, serif;
+  color: var(--ink);
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(circle at 10% 10%, rgba(255,255,255,0.08), transparent 10%),
+    linear-gradient(180deg, rgba(0,0,0,0.02) 0%, transparent 10%),
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0 1px, transparent 1px 6px);
+  -webkit-font-smoothing:antialiased;
+}
+
+.navbar-brand{
+  font-family: 'Cinzel', 'Times New Roman', serif;
+  letter-spacing:1px;
+  color: var(--accent-dark) !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.navbar{
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,250,240,0.9));
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
 .boards-row { display:flex; gap:1rem; align-items:flex-start; }
 .board-column { flex:1; min-height:320px; max-height:80vh; overflow:auto; }
 .board-list { min-height: 50px; }
-.card-item { background:#fff; border-radius:6px; padding:0.6rem; margin-bottom:0.6rem; box-shadow:0 1px 2px rgba(0,0,0,0.05); cursor:grab; }
+.card-item {
+  background: var(--card-bg);
+  border-radius:8px;
+  padding:0.65rem;
+  margin-bottom:0.65rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.05);
+  cursor:grab;
+  position:relative;
+}
+.card-item:before{
+  content: '';
+  position:absolute; right:8px; top:8px; width:10px; height:10px; border-radius:2px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(0,0,0,0.06)); opacity:0.3;
+}
 .card-item:active { cursor:grabbing; }
-.card-item.dragging { opacity:0.5; }
-.board-column h6 { margin-bottom:0.75rem; }
+.card-item.dragging { opacity:0.6; transform:scale(.995); }
+.board-column h6 { margin-bottom:0.75rem; font-family: 'Cinzel', serif; color:var(--accent-dark); }
 #upcoming-list .list-group-item { display:flex; justify-content:space-between; align-items:center; }
 @media (max-width: 767px) {
   .boards-row { flex-direction: column; }
 }
+
+/* Accent buttons */
+.btn-primary{
+  background: linear-gradient(180deg,var(--accent), var(--accent-dark));
+  border-color: rgba(0,0,0,0.08);
+  color: #fff;
+}
+.btn-outline-primary{
+  color: var(--accent-dark);
+  border-color: var(--accent-dark);
+}
+
+/* Subtle decorative frame for containers */
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,250,240,0.95));
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* Footer matching the parchment theme */
+.site-footer{
+  background: transparent;
+  color: var(--muted);
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.site-footer .container { background: transparent; }
+
 
 /* Horizontal gallery styles */
 .horizontal-gallery { gap: 0.75rem; -webkit-overflow-scrolling: touch; }

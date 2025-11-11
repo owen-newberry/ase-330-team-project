@@ -204,18 +204,13 @@
     shown.forEach(b=>{
       const a = document.createElement('a');
       a.className = 'card text-decoration-none text-dark';
-  a.href = `board.html?board=${b.id}`;
+      a.href = `board.html?board=${b.id}`;
       a.style.minHeight = '120px';
-      // apply saved background if present
-      if (b.background) {
-        // b.background contains a CSS background value (color, gradient, or url(...) center/cover)
-        a.style.background = b.background;
-        // ensure text is readable when background is present
-        a.classList.remove('text-dark');
-        a.classList.add('text-white');
-      } else {
-        a.style.background = '';
-      }
+      // Do not apply any saved background on dashboard cards — keep cards plain for readability
+      a.style.background = '';
+      a.classList.remove('text-white');
+      a.classList.add('text-dark');
+
       const body = document.createElement('div');
       body.className = 'card-body';
       const title = document.createElement('h5');
@@ -229,7 +224,7 @@
       const open = document.createElement('button');
       open.className = 'btn btn-sm btn-outline-primary';
       open.textContent = 'Open';
-  open.addEventListener('click', (e)=>{ e.preventDefault(); window.location.href = `board.html?board=${b.id}`; });
+      open.addEventListener('click', (e)=>{ e.preventDefault(); window.location.href = `board.html?board=${b.id}`; });
       const del = document.createElement('button');
       del.className = 'btn btn-sm btn-outline-danger';
       del.textContent = 'Delete';
@@ -406,11 +401,9 @@
             const a = document.createElement('a');
             a.className = 'card text-decoration-none text-dark';
             a.href = `boards.html?board=${b.id}`;
-            // apply background if present
-            if (b.background) {
-              a.style.background = b.background;
-              a.classList.remove('text-dark'); a.classList.add('text-white');
-            }
+            // Do not apply any saved background on dashboard search cards — keep plain for readability
+            a.style.background = '';
+            a.classList.remove('text-white'); a.classList.add('text-dark');
             const body = document.createElement('div');
             body.className = 'card-body';
             const title = document.createElement('h5'); title.className='card-title mb-1'; title.textContent=b.name;
@@ -541,6 +534,47 @@
         // attach drag handlers
         el.addEventListener('dragstart', onDragStart);
         el.addEventListener('dragend', onDragEnd);
+
+        // If the card is in the done column, show a redeem button (if not redeemed)
+        if (col === 'done'){
+          const btnWrap = document.createElement('div');
+          btnWrap.className = 'mt-2';
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-sm btn-success';
+          const REWARD_PER_TASK = 10; // points per redeemed completed task
+          if (card.redeemed) {
+            btn.textContent = 'Redeemed';
+            btn.disabled = true;
+            btn.classList.add('btn-outline-success');
+            btn.classList.remove('btn-success');
+          } else {
+            btn.textContent = `Redeem +${REWARD_PER_TASK} pts`;
+            btn.addEventListener('click', (e)=>{
+              e.preventDefault();
+              // prevent double-redeem
+              if (card.redeemed) return;
+              // award points and mark card redeemed
+              try {
+                earnPoints(REWARD_PER_TASK);
+              } catch(err) {
+                console.error('Error awarding points', err);
+              }
+              card.redeemed = true;
+              // persist boards and update UI
+              save();
+              // update button state
+              btn.textContent = 'Redeemed';
+              btn.disabled = true;
+              btn.classList.add('btn-outline-success');
+              btn.classList.remove('btn-success');
+              // refresh goals UI if rewards panel exists
+              if (typeof updateRewardsUI === 'function') updateRewardsUI();
+            });
+          }
+          btnWrap.appendChild(btn);
+          el.appendChild(btnWrap);
+        }
+
         list.appendChild(el);
       });
     });
