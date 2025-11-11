@@ -511,8 +511,11 @@
     // set title and background
     const titleEl = document.getElementById('board-title');
     if (titleEl) titleEl.textContent = board.name;
-    const header = document.getElementById('board-header');
-    if (header && board.background) header.style.background = board.background;
+  // Do not apply the board's saved background on the board detail page in this prototype.
+  // Backgrounds are still saved with the board object for gallery/preview use,
+  // but we avoid applying them here to keep the detail view readable and consistent.
+  // const header = document.getElementById('board-header');
+  // if (header && board.background) header.style.background = board.background;
 
     renderBoardColumns(board);
     setupBoardInteractions(board);
