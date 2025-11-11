@@ -9,32 +9,37 @@
 </head>
 <body id="page-rewards">
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container">
-      <button class="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+        <div class="container">
+            <button class="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
+                aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-      <a class="navbar-brand fw-bold me-3" href="index.html">Quest Log</a>
+            <div class="d-flex align-items-center">
+                <a href="account.html"
+                    class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex justify-content-center align-items-center"
+                    title="Account" style="width:38px;height:38px;padding:0;background:#fff">
+                    <img src="https://via.placeholder.com/32" alt="avatar" class="rounded-circle"
+                        style="width:32px;height:32px;">
+                </a>
+            </div>
 
-      <form class="d-none d-md-flex ms-3 me-3" role="search">
-        <input id="nav-search" class="form-control form-control-sm" type="search" placeholder="Search tasks, boards..." aria-label="Search">
-      </form>
+            <a class="navbar-brand fw-bold ms-3 me-3" href="index.html">Quest Log</a>
 
-      <div class="d-flex align-items-center">
-        <a href="account.html" class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex justify-content-center align-items-center" title="Account" style="width:38px;height:38px;padding:0;background:#fff">
-          <img src="https://via.placeholder.com/32" alt="avatar" class="rounded-circle" style="width:32px;height:32px;">
-        </a>
-      </div>
+            <form class="d-none d-md-flex ms-3 me-3" role="search">
+                <input id="nav-search" class="form-control form-control-sm" type="search"
+                    placeholder="Search tasks, boards..." aria-label="Search">
+            </form>
 
-      <div class="collapse navbar-collapse" id="nav">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
-          <li class="nav-item"><a class="nav-link" href="teams-dashboard.html">Teams</a></li>
-          <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
+                    <li class="nav-item"><a class="nav-link" href="teams-dashboard.html">Teams</a></li>
+                    <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
+                </ul>
+        </div>
+        </div>
+    </nav>
 
   <main class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -79,45 +84,11 @@
       </div>
     </div>
 
-    <div>
-      <h5>Catalog</h5>
-      <div class="row g-3">
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-body">
-              <h6>Coffee voucher</h6>
-              <p class="small text-muted">Cost: 50 points</p>
-              <button class="btn btn-sm btn-primary redeem-btn" data-cost="50">Redeem</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-body">
-              <h6>Extra day off</h6>
-              <p class="small text-muted">Cost: 200 points</p>
-              <button class="btn btn-sm btn-primary redeem-btn" data-cost="200">Redeem</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-body">
-              <h6>Company swag</h6>
-              <p class="small text-muted">Cost: 120 points</p>
-              <button class="btn btn-sm btn-primary redeem-btn" data-cost="120">Redeem</button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
+    
 
   </main>
 
-  <footer class="text-center py-3 bg-light mt-auto">
+  <footer class="text-center py-3 site-footer mt-auto">
     <div class="container small">Rewards are simulated client-side and stored in your browser.</div>
   </footer>
 
