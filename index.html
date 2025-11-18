@@ -56,10 +56,61 @@
             <div class="col-lg-8">
                 <div class="card mb-3">
                     <div class="card-body">
-
-                        <!-- Horizontally scrollable galleries -->
+                        <h5 class="card-title">All boards</h5>
+                        
                         <section class="mt-4">
-                            <h5 class="mb-2">Your tasks</h5>
+                            <h5 class="mb-2">Boards</h5>
+                            <div class="horizontal-gallery d-flex overflow-auto pb-2">
+                                <a href="boards.html" class="card card-item p-2 me-3 text-decoration-none text-dark"
+                                    style="min-width:200px;flex:0 0 auto;">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Product Board</h6>
+                                        <p class="small text-muted mb-0">3 columns • 12 cards</p>
+                                    </div>
+                                </a>
+                                <a href="boards.html" class="card card-item p-2 me-3 text-decoration-none text-dark"
+                                    style="min-width:200px;flex:0 0 auto;">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Marketing</h6>
+                                        <p class="small text-muted mb-0">2 columns • 5 cards</p>
+                                    </div>
+                                </a>
+                            </div>
+                        </section>
+
+                        <hr class="my-4">
+
+                        <section class="mt-4">
+                            <h5 class="mb-2">Teams</h5>
+                            <div class="horizontal-gallery d-flex overflow-auto pb-2">
+                                <a href="teams.html" class="card card-item p-2 me-3 text-decoration-none text-dark"
+                                    style="min-width:200px;flex:0 0 auto;">
+                                    <div class="card-body">
+                                        <h6 class="card-title">ASE 330</h6>
+                                    </div>
+                                </a>
+                                <a href="teams.html" class="card card-item p-2 me-3 text-decoration-none text-dark"
+                                    style="min-width:200px;flex:0 0 auto;">
+                                    <div class="card-body">
+                                        <h6 class="card-title">HNR 310</h6>
+                                    </div>
+                                </a>
+                            </div>
+                        </section>
+                        
+                        <hr class="my-4">
+                        
+
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Upcoming tasks</h5>
+                        <ul id="upcoming-list" class="list-group list-group-flush">
+                            <section class="mt-4">
+                            <!-- Horizontally scrollable galleries -->
+                                <h5 class="mb-2">Your tasks</h5>
                             <div class="horizontal-gallery d-flex overflow-auto pb-2">
                                 <div class="card card-item p-2 me-3" style="min-width:220px;flex:0 0 auto;">
                                     <div class="card-body">
@@ -85,6 +136,7 @@
                             </div>
                         </section>
 
+
                         <section class="mt-4">
                             <h5 class="mb-2">Team tasks</h5>
                             <div class="horizontal-gallery d-flex overflow-auto pb-2">
@@ -106,53 +158,6 @@
                                 </div>
                             </div>
                         </section>
-
-                        <section class="mt-4">
-                            <h5 class="mb-2">Boards</h5>
-                            <div class="horizontal-gallery d-flex overflow-auto pb-2">
-                                <a href="boards.html" class="card card-item p-2 me-3 text-decoration-none text-dark"
-                                    style="min-width:200px;flex:0 0 auto;">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Product Board</h6>
-                                        <p class="small text-muted mb-0">3 columns • 12 cards</p>
-                                    </div>
-                                </a>
-                                <a href="boards.html" class="card card-item p-2 me-3 text-decoration-none text-dark"
-                                    style="min-width:200px;flex:0 0 auto;">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Marketing</h6>
-                                        <p class="small text-muted mb-0">2 columns • 5 cards</p>
-                                    </div>
-                                </a>
-                            </div>
-                        </section>
-
-                        <section class="mt-4">
-                            <h5 class="mb-2">Teams</h5>
-                            <div class="horizontal-gallery d-flex overflow-auto pb-2">
-                                <a href="teams.html" class="card card-item p-2 me-3 text-decoration-none text-dark"
-                                    style="min-width:200px;flex:0 0 auto;">
-                                    <div class="card-body">
-                                        <h6 class="card-title">ASE 330</h6>
-                                    </div>
-                                </a>
-                                <a href="teams.html" class="card card-item p-2 me-3 text-decoration-none text-dark"
-                                    style="min-width:200px;flex:0 0 auto;">
-                                    <div class="card-body">
-                                        <h6 class="card-title">HNR 310</h6>
-                                    </div>
-                                </a>
-                            </div>
-                        </section>
-
-                    </div>
-                </div>
-
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Upcoming tasks</h5>
-                        <ul id="upcoming-list" class="list-group list-group-flush">
-                            <!-- tasks populated by JS -->
                         </ul>
                     </div>
                 </div>
