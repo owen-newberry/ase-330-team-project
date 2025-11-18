@@ -29,7 +29,6 @@
       <div class="collapse navbar-collapse" id="nav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
-          <li class="nav-item"><a class="nav-link" href="teams-dashboard.html">Teams</a></li>
           <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
         </ul>
       </div>
@@ -40,9 +39,6 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h1 class="h3 mb-0">Boards</h1>
       <div class="d-flex align-items-center gap-2">
-        <div id="team-filters" class="me-2">
-          <!-- filters inserted by JS -->
-        </div>
         <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#newBoardModal">+ New board</button>
       </div>
     </div>
@@ -71,15 +67,6 @@
                 <label class="form-label">Board name</label>
                 <input id="board-name" class="form-control" required>
               </div>
-                <div class="mb-3">
-                  <label class="form-label">Team</label>
-                  <select id="board-team-select" class="form-select">
-                    <option value="">No team</option>
-                    <!-- team options populated by JS -->
-                    <option value="__other__">Other...</option>
-                  </select>
-                  <input id="board-team-new" class="form-control mt-2 d-none" placeholder="Enter new team name">
-                </div>
 
                 <div class="mb-3">
                   <label class="form-label">Background preview</label>

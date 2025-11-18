@@ -1,10 +1,8 @@
 // Simple client-side boards manager: create, list, filter, persist to localStorage
 const STORAGE_KEY = 'prod_boards_v1';
-const TEAMS_KEY = 'prod_teams_v1';
 const REWARDS_KEY = 'prod_rewards_v1';
 const HAS_VISITED = 'has_visited_site';
 let boards = [];
-let teams = [];
 let activeFilter = 'All';
 
 function $(s) { return document.querySelector(s); }
@@ -17,25 +15,12 @@ function load() {
   } else {
     // sample seed data
     boards = [
-      {id: id(), name: 'Product Board', team: 'Core Team', updatedAt: Date.now()-1000*60*60*24},
-      {id: id(), name: 'Marketing', team: 'Growth', updatedAt: Date.now()-1000*60*60*5},
+      {id: id(), name: 'Product Board', updatedAt: Date.now()-1000*60*60*24},
+      {id: id(), name: 'Marketing', updatedAt: Date.now()-1000*60*60*5},
     ];
     save();
   }
-  // load teams
-  const tRaw = localStorage.getItem(TEAMS_KEY);
-  if (tRaw) {
-    try { teams = JSON.parse(tRaw); } catch(e){ teams = []; }
-  } else {
-    teams = [
-      { id: 't_'+Math.random().toString(36).slice(2,8), name: 'Core Team', members:['alex@example.com'], background: '#6f42c1', updatedAt: Date.now()-1000*60*60*48 },
-    ];
-    saveTeams();
-  }
 }
-
-
-function saveTeams(){ localStorage.setItem(TEAMS_KEY, JSON.stringify(teams)); }
 
 // rewards state: { points: number, goals: Array<{id,title,target}> }
 let rewards = { points: 0, goals: [] };
@@ -163,46 +148,15 @@ function formatDate(ts){
   return d.toLocaleString();
 }
 
-function renderFilters(){
-  const container = $('#team-filters');
-  if (!container) return;
-  // use teams from teams storage when available
-  const teams = Array.from(new Set(teamsFromData().filter(Boolean)));
-  container.innerHTML = '';
-  const allBtn = document.createElement('button');
-  allBtn.className = 'btn btn-sm btn-outline-secondary me-2';
-  allBtn.textContent = 'All';
-  if (activeFilter === 'All') allBtn.classList.add('active');
-  allBtn.addEventListener('click', ()=>{ activeFilter='All'; render(); });
-  container.appendChild(allBtn);
-  teams.forEach(t=>{
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-sm btn-outline-secondary me-2';
-    btn.textContent = t;
-    if (activeFilter === t) btn.classList.add('active');
-    btn.addEventListener('click', ()=>{ activeFilter=t; render(); });
-    container.appendChild(btn);
-  });
-}
-
-function teamsFromData(){
-  // prefer explicit teams list if present, otherwise infer from boards
-  if (teams && teams.length) return teams.map(t=>t.name);
-  return Array.from(new Set(boards.map(b=>b.team).filter(Boolean)));
-}
-
 function render(){
-  renderFilters();
-  populateTeamSelect();
   const gallery = $('#boards-gallery');
   if (!gallery) return;
   gallery.innerHTML = '';
-  const shown = boards.filter(b => activeFilter === 'All' || b.team === activeFilter);
-  if (shown.length === 0){
+  if (boards.length === 0){
     gallery.innerHTML = '<div class="text-muted">No boards yet.</div>';
     return;
   }
-  shown.forEach(b=>{
+  boards.forEach(b=>{
     const a = document.createElement('a');
     a.className = 'card text-decoration-none text-dark';
     a.href = `board.html?board=${b.id}`;
@@ -219,7 +173,7 @@ function render(){
     title.textContent = b.name;
     const meta = document.createElement('div');
     meta.className = 'board-meta mb-2';
-    meta.textContent = `${b.team || 'No team'} • Last updated ${formatDate(b.updatedAt)}`;
+    meta.textContent = `Last updated ${formatDate(b.updatedAt)}`;
     const actions = document.createElement('div');
     actions.className = 'd-flex gap-2';
     const open = document.createElement('button');
@@ -242,83 +196,16 @@ function render(){
   });
 }
 
-// --- Teams dashboard rendering and form handling ---
-function renderTeams(){
-  const gallery = $('#teams-gallery');
-  if (!gallery) return;
-  gallery.innerHTML = '';
-  if (!teams || teams.length === 0) { gallery.innerHTML = '<div class="text-muted">No teams yet.</div>'; return; }
-  teams.forEach(t=>{
-    const a = document.createElement('a');
-    a.className = 'card text-decoration-none text-dark';
-    a.href = `teams.html?team=${encodeURIComponent(t.name)}`;
-    const body = document.createElement('div'); body.className='card-body';
-    const title = document.createElement('h5'); title.className='card-title mb-1'; title.textContent = t.name;
-    const meta = document.createElement('div'); meta.className='board-meta mb-2';
-    meta.textContent = `${(t.members||[]).length} members • Last updated ${formatDate(t.updatedAt||0)}`;
-    const actions = document.createElement('div'); actions.className='d-flex gap-2';
-    const open = document.createElement('button'); open.className='btn btn-sm btn-outline-primary'; open.textContent='Open';
-    open.addEventListener('click', e => { e.preventDefault(); window.location.href = `teams.html?team=${encodeURIComponent(t.name)}`; });
-    const del = document.createElement('button'); del.className='btn btn-sm btn-outline-danger'; del.textContent='Delete';
-    del.addEventListener('click', e=>{ e.preventDefault(); if(!confirm('Delete team "'+t.name+'"?')) return; teams = teams.filter(x=>x.id!==t.id); saveTeams(); renderTeams(); populateTeamSelect(); render(); });
-    actions.appendChild(open); actions.appendChild(del);
-    body.appendChild(title); body.appendChild(meta); body.appendChild(actions); a.appendChild(body); gallery.appendChild(a);
-  });
-}
-
-function setupTeamForm(){
-  const form = $('#new-team-form');
-  if (!form) return;
-  form.addEventListener('submit', ev=>{
-    ev.preventDefault();
-    const name = $('#team-name').value.trim();
-    const members = ($('#team-members').value || '').split(',').map(s=>s.trim()).filter(Boolean);
-    const bgInput = document.querySelector('input[name="team-bg"]:checked');
-    const background = bgInput ? bgInput.value : '';
-    if (!name) return alert('Please provide a team name');
-    const t = { id: 't_'+Math.random().toString(36).slice(2,8), name, members, background, updatedAt: Date.now() };
-    teams.unshift(t);
-    saveTeams();
-    form.reset();
-    const modalEl = document.getElementById('newTeamModal');
-    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-    modal.hide();
-    renderTeams();
-    populateTeamSelect();
-    render();
-  });
-
-  // wire team bg preview similar to boards
-  const choices = Array.from(document.querySelectorAll('input[name="team-bg"]'));
-  const preview = document.getElementById('team-bg-preview-large');
-  if (preview && choices.length) {
-    const apply = v=> preview.style.background = v;
-    const cur = document.querySelector('input[name="team-bg"]:checked'); if (cur) apply(cur.value);
-    choices.forEach(ch=>{ ch.addEventListener('change', ()=>{ if (ch.checked) apply(ch.value); }); const lbl = ch.closest('.bg-choice'); if (lbl){ lbl.addEventListener('mouseenter', ()=>apply(ch.value)); lbl.addEventListener('mouseleave', ()=>{ const c = document.querySelector('input[name="team-bg"]:checked'); if (c) apply(c.value); }); } });
-  }
-}
-
 function setupForm(){
   const form = $('#new-board-form');
   if (!form) return;
   form.addEventListener('submit', (ev)=>{
     ev.preventDefault();
     const name = $('#board-name').value.trim();
-    // determine team from select or new input
-    const select = $('#board-team-select');
-    const newTeamInput = $('#board-team-new');
-    let team = '';
-    if (select) {
-      if (select.value === '__other__') {
-        team = newTeamInput ? newTeamInput.value.trim() : '';
-      } else {
-        team = select.value.trim();
-      }
-    }
     const bgInput = document.querySelector('input[name="board-bg"]:checked');
     const background = bgInput ? bgInput.value : '';
     if (!name) return alert('Please provide a board name');
-const b = { id: id(), name, team, updatedAt: Date.now(), background, cards: [] };
+    const b = { id: id(), name, updatedAt: Date.now(), background, cards: [] };
     boards.unshift(b);
     save();
     // reset form and hide modal
@@ -329,40 +216,6 @@ const b = { id: id(), name, team, updatedAt: Date.now(), background, cards: [] }
     activeFilter = 'All';
     render();
   });
-
-  // wire select change to show/hide 'new team' input
-  const teamSelect = $('#board-team-select');
-  const teamNew = $('#board-team-new');
-  if (teamSelect && teamNew) {
-    teamSelect.addEventListener('change', ()=>{
-      if (teamSelect.value === '__other__') {
-        teamNew.classList.remove('d-none');
-        teamNew.focus();
-      } else {
-        teamNew.classList.add('d-none');
-      }
-    });
-  }
-}
-
-function populateTeamSelect(){
-  const sel = $('#board-team-select');
-  if (!sel) return;
-  const existing = sel.value; // preserve selection
-  // compute unique teams from boards
-  const teams = Array.from(new Set(boards.map(b=>b.team).filter(Boolean)));
-  // clear options
-  sel.innerHTML = '';
-  const optNone = document.createElement('option'); optNone.value=''; optNone.textContent='No team'; sel.appendChild(optNone);
-  teams.forEach(t=>{
-    const o = document.createElement('option'); o.value = t; o.textContent = t; sel.appendChild(o);
-  });
-  const optOther = document.createElement('option'); optOther.value='__other__'; optOther.textContent='Other...'; sel.appendChild(optOther);
-  // restore previous selection when possible
-  if (existing) {
-    const match = Array.from(sel.options).some(o=>o.value===existing);
-    if (match) sel.value = existing; else sel.value='';
-  }
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -372,29 +225,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // wire background preview interactions
   wireBgPreview();
-
-  // setup teams page if present
-  setupTeamForm();
-  renderTeams();
-
-  // Invite modal wiring (teams page)
-  const inviteForm = document.getElementById('invite-form');
-  if (inviteForm) {
-    inviteForm.addEventListener('submit', (ev)=>{
-      ev.preventDefault();
-      const emailInput = document.getElementById('invite-email');
-      const email = emailInput ? (emailInput.value || '').trim() : '';
-      if (!email) { alert('Please enter an email address.'); return; }
-      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      if (!emailOk) { alert('Please enter a valid email address.'); return; }
-      // Simulate sending invite (no backend) — you could persist invites to localStorage if needed
-      alert('Invitation sent to ' + email);
-      const modalEl = document.getElementById('inviteModal');
-      const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-      modal.hide();
-      inviteForm.reset();
-    });
-  }
 
   // If this is a board detail page, initialize board UI
   const params = new URLSearchParams(window.location.search);
@@ -412,10 +242,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
       t = setTimeout(()=>{
         const q = search.value.trim().toLowerCase();
         if (!q) { activeFilter='All'; render(); return; }
-        // filter by name or team
+        // filter by name
         const gallery = $('#boards-gallery');
         gallery.innerHTML = '';
-        const filtered = boards.filter(b => b.name.toLowerCase().includes(q) || (b.team||'').toLowerCase().includes(q));
+        const filtered = boards.filter(b => b.name.toLowerCase().includes(q));
         if (filtered.length===0){ gallery.innerHTML = '<div class="text-muted">No matches.</div>'; return; }
         filtered.forEach(b=>{
           const a = document.createElement('a');
@@ -427,7 +257,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
           const body = document.createElement('div');
           body.className = 'card-body';
           const title = document.createElement('h5'); title.className='card-title mb-1'; title.textContent=b.name;
-          const meta = document.createElement('div'); meta.className='board-meta mb-2'; meta.textContent = `${b.team||'No team'} • Last updated ${formatDate(b.updatedAt)}`;
+          const meta = document.createElement('div'); meta.className='board-meta mb-2'; meta.textContent = `Last updated ${formatDate(b.updatedAt)}`;
           body.appendChild(title); body.appendChild(meta);
           a.appendChild(body); gallery.appendChild(a);
         });
