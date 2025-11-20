@@ -22,6 +22,7 @@ function load() {
   }
 }
 
+
 // rewards state: { points: number, goals: Array<{id,title,target}> }
 let rewards = { points: 0, goals: [] };
 
@@ -51,8 +52,10 @@ function saveRewards(){ localStorage.setItem(REWARDS_KEY, JSON.stringify(rewards
 
 function updateRewardsUI(){
   const ptsEl = document.getElementById('rewards-points');
+  const accPtsEl = document.getElementById('account-points');
   const list = document.getElementById('goals-list');
   if (ptsEl) ptsEl.textContent = String(rewards.points);
+  if (accPtsEl) accPtsEl.textContent = String(rewards.points);
   if (!list) return;
   list.innerHTML = '';
   if (!rewards.goals || rewards.goals.length === 0){
@@ -194,6 +197,20 @@ function render(){
     a.appendChild(body);
     gallery.appendChild(a);
   });
+
+  // Add a final card that opens the "Create new board" modal
+  const createCard = document.createElement('div');
+  createCard.className = 'card text-center border-dashed';
+  createCard.style.minHeight = '120px';
+  createCard.style.display = 'flex';
+  createCard.style.alignItems = 'center';
+  createCard.style.justifyContent = 'center';
+  createCard.innerHTML = `
+    <div class="card-body">
+      <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newBoardModal">+ Create board</button>
+    </div>
+  `;
+  gallery.appendChild(createCard);
 }
 
 function setupForm(){
@@ -220,6 +237,9 @@ function setupForm(){
 
 document.addEventListener('DOMContentLoaded', ()=>{
   load();
+  // Ensure rewards state is loaded for all pages so points stay in sync across account/rewards/boards
+  loadRewards();
+  updateRewardsUI();
   setupForm();
   render();
 
