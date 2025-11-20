@@ -61,6 +61,7 @@
                 <button class="btn btn-sm btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add a new card to the To Do list">Add</button>
               </div>
               <input class="form-control form-control-sm new-card-desc" placeholder="Optional description" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add an optional description for the card">
+              <input class="form-control form-control-sm new-card-duedate mt-2" type="datetime-local" placeholder="Due date (optional)" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Optional due date for this task">
             </form>
             <div id="col-todo" class="board-list"></div>
           </div>
@@ -73,6 +74,7 @@
                 <button class="btn btn-sm btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add a new card to the In Progress list">Add</button>
               </div>
               <input class="form-control form-control-sm new-card-desc" placeholder="Optional description" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add an optional description for the card">
+              <input class="form-control form-control-sm new-card-duedate mt-2" type="datetime-local" placeholder="Due date (optional)" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Optional due date for this task">
             </form>
             <div id="col-inprogress" class="board-list"></div>
           </div>
@@ -85,6 +87,7 @@
                 <button class="btn btn-sm btn-primary" type="submit" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add a new card to the Done list">Add</button>
               </div>
               <input class="form-control form-control-sm new-card-desc" placeholder="Optional description" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Add an optional description for the card">
+              <input class="form-control form-control-sm new-card-duedate mt-2" type="datetime-local" placeholder="Due date (optional)" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Optional due date for this task">
             </form>
             <div id="col-done" class="board-list">
               <!-- Example card with redeem button -->
@@ -102,6 +105,43 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Task details / edit modal -->
+  <div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="taskDetailsModalLabel">Task Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="task-details-view">
+            <h5 id="task-detail-title" class="mb-2"></h5>
+            <div id="task-detail-desc" class="mb-2 text-muted"></div>
+            <div id="task-detail-due" class="mb-2 small text-muted"></div>
+            <div id="task-detail-meta" class="mb-2 small text-muted"></div>
+          </div>
+
+          <form id="task-edit-form" style="display:none;">
+            <div class="mb-2">
+              <input id="task-edit-title" class="form-control" />
+            </div>
+            <div class="mb-2">
+              <textarea id="task-edit-desc" class="form-control" rows="4"></textarea>
+            </div>
+            <div class="mb-2">
+              <input id="task-edit-duedate" class="form-control" type="datetime-local" />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="task-edit-toggle" class="btn btn-sm btn-outline-primary">Edit</button>
+          <button type="button" id="task-delete-btn" class="btn btn-sm btn-outline-danger">Delete</button>
+          <button type="button" id="task-save-btn" class="btn btn-sm btn-primary" style="display:none;">Save</button>
+          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <script>
     // Initialize all tooltips
     document.addEventListener('DOMContentLoaded', function () {

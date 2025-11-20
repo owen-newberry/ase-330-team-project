@@ -403,7 +403,9 @@ function renderBoardColumns(board){
       el.className = 'card-item';
       el.draggable = true;
       el.dataset.cardId = card.id;
-      el.innerHTML = `<div><strong>${escapeHtml(card.title)}</strong></div><div class="small text-muted">${card.description||''}</div>`;
+    // show title, short description and (optional) due date
+    const dueText = card.dueDate ? `<div class="small text-muted">Due: ${escapeHtml(formatDate(card.dueDate))}</div>` : '';
+    el.innerHTML = `<div><strong>${escapeHtml(card.title)}</strong></div><div class="small text-muted">${card.description||''}</div>${dueText}`;
       // attach drag handlers
       el.addEventListener('dragstart', onDragStart);
       el.addEventListener('dragend', onDragEnd);
@@ -424,6 +426,7 @@ function renderBoardColumns(board){
           btn.textContent = `Redeem +${REWARD_PER_TASK} pts`;
           btn.addEventListener('click', (e)=>{
             e.preventDefault();
+            e.stopPropagation();
             // prevent double-redeem
             if (card.redeemed) return;
             // award points and mark card redeemed
@@ -448,6 +451,11 @@ function renderBoardColumns(board){
         el.appendChild(btnWrap);
       }
 
+      // open details modal when card clicked (but avoid when clicking controls)
+      el.addEventListener('click', (e)=>{
+        openTaskModal(board, card.id);
+      });
+
       list.appendChild(el);
     });
   });
@@ -460,11 +468,14 @@ function setupBoardInteractions(board){
       ev.preventDefault();
       const input = form.querySelector('.new-card-title');
       const desc = form.querySelector('.new-card-desc');
+      const due = form.querySelector('.new-card-duedate');
       const column = form.dataset.column;
       const title = input.value.trim();
       const description = desc ? desc.value.trim() : '';
+      const dueVal = due && due.value ? due.value : '';
       if (!title) return;
       const card = { id: 'c_'+Math.random().toString(36).slice(2,9), title, description, column };
+      if (dueVal) card.dueDate = new Date(dueVal).toISOString();
       board.cards = board.cards || [];
       board.cards.push(card);
       board.updatedAt = Date.now();
@@ -472,6 +483,7 @@ function setupBoardInteractions(board){
       renderBoardColumns(board);
       input.value = '';
       if (desc) desc.value = '';
+      if (due) due.value = '';
     });
   });
 
@@ -504,4 +516,125 @@ function moveCardToColumn(board, cardId, targetColumn){
 }
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]); }
+
+// --- Task details / edit / delete modal handlers ---
+function findCard(board, cardId){ return (board.cards||[]).find(c=>c.id===cardId); }
+
+function openTaskModal(board, cardId){
+  const card = findCard(board, cardId);
+  if (!card) return;
+  const modalEl = document.getElementById('taskDetailsModal');
+  if (!modalEl) return;
+  // populate view
+  document.getElementById('task-detail-title').textContent = card.title || '';
+  document.getElementById('task-detail-desc').textContent = card.description || '';
+  // human-friendly status labels
+  function columnLabel(col){
+    if (!col) return 'Unknown';
+    const map = { todo: 'To Do', inprogress: 'In Progress', done: 'Done' };
+    return map[col] || String(col).replace(/[-_]/g,' ');
+  }
+
+  const statusLabel = columnLabel(card.column);
+  const redeemedLabel = card.redeemed ? 'Yes' : 'No';
+  document.getElementById('task-detail-meta').textContent = `Status: ${statusLabel} • Redeemed: ${redeemedLabel}`;
+  const dueEl = document.getElementById('task-detail-due');
+  if (card.dueDate){
+    try { dueEl.textContent = 'Due: ' + formatDate(card.dueDate); dueEl.style.display = ''; }
+    catch(e){ dueEl.textContent = ''; dueEl.style.display = 'none'; }
+  } else { dueEl.textContent = ''; dueEl.style.display = 'none'; }
+
+  // prepare edit form (hidden by default)
+  document.getElementById('task-edit-form').style.display = 'none';
+  document.getElementById('task-details-view').style.display = '';
+  document.getElementById('task-edit-toggle').style.display = '';
+  document.getElementById('task-delete-btn').style.display = '';
+  document.getElementById('task-save-btn').style.display = 'none';
+
+  // store current card id and board id on modal element for handlers
+  modalEl.dataset.cardId = card.id;
+  modalEl.dataset.boardId = board.id;
+
+  // wire edit toggle
+  const toggle = document.getElementById('task-edit-toggle');
+  const saveBtn = document.getElementById('task-save-btn');
+  const deleteBtn = document.getElementById('task-delete-btn');
+  const editForm = document.getElementById('task-edit-form');
+  const titleInput = document.getElementById('task-edit-title');
+  const descInput = document.getElementById('task-edit-desc');
+  const dueInput = document.getElementById('task-edit-duedate');
+
+  // ensure previous listeners are not duplicated: replace by cloning the node
+  const newToggle = toggle.cloneNode(true);
+  toggle.parentNode.replaceChild(newToggle, toggle);
+  const newSave = saveBtn.cloneNode(true);
+  saveBtn.parentNode.replaceChild(newSave, saveBtn);
+  const newDelete = deleteBtn.cloneNode(true);
+  deleteBtn.parentNode.replaceChild(newDelete, deleteBtn);
+
+  // fill inputs for edit
+  titleInput.value = card.title || '';
+  descInput.value = card.description || '';
+  dueInput.value = card.dueDate ? new Date(card.dueDate).toISOString().slice(0,16) : '';
+
+  // toggle handler
+  newToggle.addEventListener('click', ()=>{
+    const showingEdit = editForm.style.display !== 'none';
+    if (!showingEdit){
+      // show edit
+      document.getElementById('task-details-view').style.display = 'none';
+      editForm.style.display = '';
+      newToggle.textContent = 'Cancel';
+      newSave.style.display = '';
+    } else {
+      // cancel edit
+      editForm.style.display = 'none';
+      document.getElementById('task-details-view').style.display = '';
+      newToggle.textContent = 'Edit';
+      newSave.style.display = 'none';
+    }
+  });
+
+  // save handler
+  newSave.addEventListener('click', ()=>{
+    const bId = modalEl.dataset.boardId;
+    const cId = modalEl.dataset.cardId;
+    const b = getBoardById(bId);
+    if (!b) return;
+    const c = findCard(b, cId);
+    if (!c) return;
+    c.title = titleInput.value.trim() || c.title;
+    c.description = descInput.value.trim() || '';
+    c.dueDate = dueInput.value ? new Date(dueInput.value).toISOString() : null;
+    b.updatedAt = Date.now();
+    save();
+    renderBoardColumns(b);
+    // update modal view back to display mode
+    document.getElementById('task-details-view').style.display = '';
+    editForm.style.display = 'none';
+    newToggle.textContent = 'Edit';
+    newSave.style.display = 'none';
+    // refresh populated fields
+    openTaskModal(b, c.id);
+  });
+
+  // delete handler
+  newDelete.addEventListener('click', ()=>{
+    if (!confirm('Delete this task?')) return;
+    const bId = modalEl.dataset.boardId;
+    const cId = modalEl.dataset.cardId;
+    const b = getBoardById(bId);
+    if (!b) return;
+    b.cards = (b.cards||[]).filter(x=>x.id!==cId);
+    b.updatedAt = Date.now();
+    save();
+    renderBoardColumns(b);
+    const bsModal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    bsModal.hide();
+  });
+
+  // show modal
+  const bs = bootstrap.Modal.getOrCreateInstance(modalEl);
+  bs.show();
+}
 
