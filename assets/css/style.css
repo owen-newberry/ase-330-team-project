@@ -241,6 +241,15 @@ body{
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.calendar-task-time {
+  font-weight: 700;
+  opacity: 0.9;
+  margin-left: 4px;
+  flex-shrink: 0;
 }
 
 /* Motivational streak counter */

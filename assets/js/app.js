@@ -194,11 +194,17 @@ function renderCalendar() {
       return dueDate.getFullYear() === year && dueDate.getMonth() === month && dueDate.getDate() === day;
     });
     
+    // Sort tasks by time
+    dayTasks.sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
+    
     dayTasks.slice(0, 3).forEach(task => {
       const taskEl = document.createElement('div');
       taskEl.className = 'calendar-task';
-      taskEl.textContent = task.title;
-      taskEl.title = `${task.title} (${task.boardName})`;
+      // Format time (e.g., "2:30 PM")
+      const dueTime = new Date(task.dueDate);
+      const timeStr = dueTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      taskEl.innerHTML = `${escapeHtml(task.title)} <span class="calendar-task-time">${timeStr}</span>`;
+      taskEl.title = `${task.title} at ${timeStr} (${task.boardName})`;
       cell.appendChild(taskEl);
     });
     
