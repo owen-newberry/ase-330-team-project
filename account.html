@@ -26,6 +26,8 @@
 
             <a class="navbar-brand fw-bold ms-3 me-3" href="index.html">Quest Log</a>
 
+            <span class="nav-points-badge ms-2" id="nav-points" title="Your points">0</span>
+
             <form class="d-none d-md-flex ms-3 me-3" role="search">
                 <input id="nav-search" class="form-control form-control-sm" type="search"
                     placeholder="Search tasks, boards..." aria-label="Search">
@@ -75,7 +77,36 @@
           </div>
         </div>
 
+        <!-- Achievements section -->
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">🏆 Your Achievements</h5>
+            <div id="achievements-list" class="d-flex flex-wrap gap-2">
+              <!-- Achievements rendered by JS -->
+            </div>
+          </div>
+        </div>
         
+        <!-- Stats overview -->
+        <div class="card mb-3">
+          <div class="card-body">
+            <h5 class="card-title">📊 Your Stats</h5>
+            <div class="row text-center">
+              <div class="col-4">
+                <h4 id="stat-boards">0</h4>
+                <small class="text-muted">Boards</small>
+              </div>
+              <div class="col-4">
+                <h4 id="stat-completed">0</h4>
+                <small class="text-muted">Completed</small>
+              </div>
+              <div class="col-4">
+                <h4 id="stat-streak">0</h4>
+                <small class="text-muted">Day Streak</small>
+              </div>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>

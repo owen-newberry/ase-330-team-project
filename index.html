@@ -28,6 +28,8 @@
 
             <a class="navbar-brand fw-bold ms-3 me-3" href="index.html">Quest Log</a>
 
+            <span class="nav-points-badge ms-2" id="nav-points" title="Your points">0</span>
+
             <form class="d-none d-md-flex ms-3 me-3" role="search">
                 <input id="nav-search" class="form-control form-control-sm" type="search"
                     placeholder="Search tasks, boards..." aria-label="Search">
@@ -147,6 +149,52 @@
                         <hr>
                         <a href="boards.html" class="btn btn-sm btn-outline-secondary">Open Boards</a>
                     </div>
+                </div>
+                
+                <!-- Motivational streak and achievements -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">🔥 Your Streak</h5>
+                        <div class="text-center mb-3">
+                            <span class="streak-badge" id="streak-count">0 days</span>
+                        </div>
+                        <p class="small text-muted text-center mb-0">Complete tasks daily to build your streak!</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">🏆 Achievements</h5>
+                        <div id="achievements-list" class="d-flex flex-wrap gap-2">
+                            <!-- Achievements rendered by JS -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Motivational quote -->
+                <div class="card mb-3 bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="card-body text-white text-center">
+                        <div class="fs-5 mb-2">💡</div>
+                        <p id="motivational-quote" class="mb-0 fst-italic">"The secret of getting ahead is getting started."</p>
+                        <small class="opacity-75">— Mark Twain</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Calendar View Section -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">📅 Calendar View</h5>
+                    <div>
+                        <button id="cal-prev" class="btn btn-sm btn-outline-secondary">◀</button>
+                        <span id="cal-month-label" class="mx-2 fw-semibold">December 2025</span>
+                        <button id="cal-next" class="btn btn-sm btn-outline-secondary">▶</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendar-grid">
+                    <!-- Calendar rendered by JS -->
                 </div>
             </div>
         </div>

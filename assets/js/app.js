@@ -1,12 +1,236 @@
 // Simple client-side boards manager: create, list, filter, persist to localStorage
 const STORAGE_KEY = 'prod_boards_v1';
 const REWARDS_KEY = 'prod_rewards_v1';
+const STREAK_KEY = 'prod_streak_v1';
 const HAS_VISITED = 'has_visited_site';
 let boards = [];
 let activeFilter = 'All';
+let currentCalendarMonth = new Date();
+
+// Motivational quotes
+const MOTIVATIONAL_QUOTES = [
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "Success is not final, failure is not fatal.", author: "Winston Churchill" },
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+  { text: "The future depends on what you do today.", author: "Mahatma Gandhi" },
+  { text: "Small progress is still progress.", author: "Unknown" }
+];
+
+// Achievements definitions
+const ACHIEVEMENTS = [
+  { id: 'first_task', title: 'First Steps', icon: '🎯', desc: 'Complete your first task', check: (stats) => stats.totalCompleted >= 1 },
+  { id: 'five_tasks', title: 'Getting Started', icon: '⭐', desc: 'Complete 5 tasks', check: (stats) => stats.totalCompleted >= 5 },
+  { id: 'ten_tasks', title: 'On a Roll', icon: '🌟', desc: 'Complete 10 tasks', check: (stats) => stats.totalCompleted >= 10 },
+  { id: 'fifty_tasks', title: 'Task Master', icon: '🏆', desc: 'Complete 50 tasks', check: (stats) => stats.totalCompleted >= 50 },
+  { id: 'first_board', title: 'Organized', icon: '📋', desc: 'Create your first board', check: (stats) => stats.totalBoards >= 1 },
+  { id: 'five_boards', title: 'Multi-tasker', icon: '📚', desc: 'Create 5 boards', check: (stats) => stats.totalBoards >= 5 },
+  { id: 'hundred_points', title: 'Point Collector', icon: '💰', desc: 'Earn 100 points', check: (stats) => stats.totalPoints >= 100 },
+  { id: 'streak_three', title: 'Consistent', icon: '🔥', desc: '3 day streak', check: (stats) => stats.streak >= 3 },
+  { id: 'streak_seven', title: 'Week Warrior', icon: '💪', desc: '7 day streak', check: (stats) => stats.streak >= 7 }
+];
 
 function $(s) { return document.querySelector(s); }
 function $all(s) { return Array.from(document.querySelectorAll(s)); }
+
+// Streak management
+function loadStreak() {
+  const raw = localStorage.getItem(STREAK_KEY);
+  if (raw) {
+    try { return JSON.parse(raw); } catch(e) { return { count: 0, lastDate: null }; }
+  }
+  return { count: 0, lastDate: null };
+}
+
+function saveStreak(streak) {
+  localStorage.setItem(STREAK_KEY, JSON.stringify(streak));
+}
+
+function updateStreak() {
+  const streak = loadStreak();
+  const today = new Date().toDateString();
+  const lastDate = streak.lastDate ? new Date(streak.lastDate).toDateString() : null;
+  
+  if (lastDate === today) {
+    // Already updated today
+    return streak;
+  }
+  
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  if (lastDate === yesterday.toDateString()) {
+    // Consecutive day
+    streak.count++;
+    streak.lastDate = new Date().toISOString();
+  } else if (lastDate !== today) {
+    // Streak broken or first time
+    streak.count = 1;
+    streak.lastDate = new Date().toISOString();
+  }
+  
+  saveStreak(streak);
+  return streak;
+}
+
+function getStats() {
+  let totalCompleted = 0;
+  let totalRedeemed = 0;
+  boards.forEach(b => {
+    (b.cards || []).forEach(c => {
+      if (c.column === 'done') totalCompleted++;
+      if (c.redeemed) totalRedeemed++;
+    });
+  });
+  const streak = loadStreak();
+  return {
+    totalCompleted,
+    totalRedeemed,
+    totalBoards: boards.length,
+    totalPoints: rewards.points,
+    streak: streak.count
+  };
+}
+
+function renderAchievements() {
+  const container = document.getElementById('achievements-list');
+  if (!container) return;
+  
+  const stats = getStats();
+  container.innerHTML = '';
+  
+  ACHIEVEMENTS.forEach(ach => {
+    const unlocked = ach.check(stats);
+    const badge = document.createElement('div');
+    badge.className = 'badge-achievement' + (unlocked ? '' : ' locked');
+    badge.title = ach.desc;
+    badge.innerHTML = `<span>${ach.icon}</span><span>${ach.title}</span>`;
+    container.appendChild(badge);
+  });
+}
+
+function renderStreak() {
+  const el = document.getElementById('streak-count');
+  if (!el) return;
+  const streak = loadStreak();
+  el.textContent = `${streak.count} day${streak.count !== 1 ? 's' : ''}`;
+}
+
+function renderMotivationalQuote() {
+  const quoteEl = document.getElementById('motivational-quote');
+  const authorEl = quoteEl?.parentElement?.querySelector('small');
+  if (!quoteEl) return;
+  
+  const quote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+  quoteEl.textContent = `"${quote.text}"`;
+  if (authorEl) authorEl.textContent = `— ${quote.author}`;
+}
+
+// Calendar view
+function renderCalendar() {
+  const grid = document.getElementById('calendar-grid');
+  const label = document.getElementById('cal-month-label');
+  if (!grid || !label) return;
+  
+  const year = currentCalendarMonth.getFullYear();
+  const month = currentCalendarMonth.getMonth();
+  
+  label.textContent = currentCalendarMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  
+  // Get all tasks with due dates
+  const tasksWithDates = [];
+  boards.forEach(b => {
+    (b.cards || []).forEach(c => {
+      if (c.dueDate) {
+        tasksWithDates.push({ ...c, boardName: b.name, boardId: b.id });
+      }
+    });
+  });
+  
+  // Build calendar grid
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  
+  grid.innerHTML = '';
+  
+  // Day headers
+  ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+    const header = document.createElement('div');
+    header.className = 'text-center small fw-semibold py-1';
+    header.style.background = 'var(--bg-spot)';
+    header.textContent = day;
+    grid.appendChild(header);
+  });
+  
+  // Empty cells before first day
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'calendar-day';
+    empty.style.opacity = '0.3';
+    grid.appendChild(empty);
+  }
+  
+  // Days of month
+  for (let day = 1; day <= daysInMonth; day++) {
+    const cell = document.createElement('div');
+    cell.className = 'calendar-day';
+    
+    const cellDate = new Date(year, month, day);
+    if (cellDate.toDateString() === today.toDateString()) {
+      cell.classList.add('today');
+    }
+    
+    const dayNum = document.createElement('div');
+    dayNum.className = 'day-number';
+    dayNum.textContent = day;
+    cell.appendChild(dayNum);
+    
+    // Find tasks due on this day
+    const dayTasks = tasksWithDates.filter(t => {
+      const dueDate = new Date(t.dueDate);
+      return dueDate.getFullYear() === year && dueDate.getMonth() === month && dueDate.getDate() === day;
+    });
+    
+    dayTasks.slice(0, 3).forEach(task => {
+      const taskEl = document.createElement('div');
+      taskEl.className = 'calendar-task';
+      taskEl.textContent = task.title;
+      taskEl.title = `${task.title} (${task.boardName})`;
+      cell.appendChild(taskEl);
+    });
+    
+    if (dayTasks.length > 3) {
+      const more = document.createElement('div');
+      more.className = 'small text-muted';
+      more.textContent = `+${dayTasks.length - 3} more`;
+      cell.appendChild(more);
+    }
+    
+    grid.appendChild(cell);
+  }
+}
+
+function setupCalendarNav() {
+  const prev = document.getElementById('cal-prev');
+  const next = document.getElementById('cal-next');
+  
+  if (prev) {
+    prev.addEventListener('click', () => {
+      currentCalendarMonth.setMonth(currentCalendarMonth.getMonth() - 1);
+      renderCalendar();
+    });
+  }
+  
+  if (next) {
+    next.addEventListener('click', () => {
+      currentCalendarMonth.setMonth(currentCalendarMonth.getMonth() + 1);
+      renderCalendar();
+    });
+  }
+}
 
 function load() {
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -48,14 +272,21 @@ function loadRewards(){
   }
 }
 
+
 function saveRewards(){ localStorage.setItem(REWARDS_KEY, JSON.stringify(rewards)); }
 
 function updateRewardsUI(){
+  // Update points display in navbar (all pages)
+  const navPtsEl = document.getElementById('nav-points');
+  if (navPtsEl) navPtsEl.textContent = String(rewards.points);
+  
   const ptsEl = document.getElementById('rewards-points');
   const accPtsEl = document.getElementById('account-points');
+  const homePtsEl = document.getElementById('points-badge');
   const list = document.getElementById('goals-list');
   if (ptsEl) ptsEl.textContent = String(rewards.points);
   if (accPtsEl) accPtsEl.textContent = String(rewards.points);
+  if (homePtsEl) homePtsEl.textContent = String(rewards.points);
   if (!list) return;
   list.innerHTML = '';
   if (!rewards.goals || rewards.goals.length === 0){
@@ -136,7 +367,17 @@ function claimGoal(id){
     rewards.goals = rewards.goals.filter(x=>x.id!==id);
     saveRewards();
     updateRewardsUI();
-    alert('Goal claimed: ' + g.title + ' — ' + g.target + ' points spent.');
+    
+    // Celebration confetti!
+    if (typeof confetti === 'function') {
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.6 }
+      });
+    }
+    
+    alert('🎉 Goal claimed: ' + g.title + ' — ' + g.target + ' points spent!');
   } else {
     alert('Not enough points to claim this goal.');
   }
@@ -164,19 +405,46 @@ function render(){
     a.className = 'card text-decoration-none text-dark';
     a.href = `board.html?board=${b.id}`;
     a.style.minHeight = '120px';
-    // Do not apply any saved background on dashboard cards — keep cards plain for readability
-    a.style.background = '';
-    a.classList.remove('text-white');
-    a.classList.add('text-dark');
+    a.style.position = 'relative';
+    a.style.overflow = 'hidden';
+
+    // Add color indicator bar on left side if board has a background
+    if (b.background) {
+      const colorBar = document.createElement('div');
+      colorBar.className = 'board-color-indicator';
+      // Extract color from background value
+      let bgColor = b.background;
+      if (bgColor.startsWith('url(')) {
+        bgColor = '#6f42c1'; // fallback for images
+      } else if (bgColor.startsWith('linear-gradient')) {
+        // Extract first color from gradient
+        const match = bgColor.match(/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}/);
+        bgColor = match ? match[0] : '#0d6efd';
+      }
+      colorBar.style.background = bgColor;
+      a.appendChild(colorBar);
+    }
 
     const body = document.createElement('div');
     body.className = 'card-body';
+    body.style.paddingLeft = b.background ? '16px' : '';
+    
+    // Task stats for this board
+    const todoCount = (b.cards||[]).filter(c=>c.column==='todo').length;
+    const inProgressCount = (b.cards||[]).filter(c=>c.column==='inprogress').length;
+    const doneCount = (b.cards||[]).filter(c=>c.column==='done').length;
+    
     const title = document.createElement('h5');
     title.className = 'card-title mb-1';
     title.textContent = b.name;
+    
+    const stats = document.createElement('div');
+    stats.className = 'small text-muted mb-1';
+    stats.innerHTML = `<span class="me-2">📋 ${todoCount}</span><span class="me-2">🔄 ${inProgressCount}</span><span>✅ ${doneCount}</span>`;
+    
     const meta = document.createElement('div');
     meta.className = 'board-meta mb-2';
-    meta.textContent = `Last updated ${formatDate(b.updatedAt)}`;
+    meta.textContent = `Updated ${formatDate(b.updatedAt)}`;
     const actions = document.createElement('div');
     actions.className = 'd-flex gap-2';
     const open = document.createElement('button');
@@ -192,6 +460,7 @@ function render(){
     actions.appendChild(open); actions.appendChild(del);
 
     body.appendChild(title);
+    body.appendChild(stats);
     body.appendChild(meta);
     body.appendChild(actions);
     a.appendChild(body);
@@ -245,6 +514,49 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // wire background preview interactions
   wireBgPreview();
+  
+  // Initialize home page features (calendar, achievements, streak, quotes)
+  if (document.body.id === 'page-home') {
+    renderCalendar();
+    setupCalendarNav();
+    renderAchievements();
+    renderStreak();
+    renderMotivationalQuote();
+    
+    // Update stats on home page
+    const stats = getStats();
+    const todoEl = document.getElementById('stat-todo');
+    const progressEl = document.getElementById('stat-progress');
+    const doneEl = document.getElementById('stat-done');
+    
+    let todoCount = 0, inProgressCount = 0, doneCount = 0;
+    boards.forEach(b => {
+      (b.cards || []).forEach(c => {
+        if (c.column === 'todo') todoCount++;
+        else if (c.column === 'inprogress') inProgressCount++;
+        else if (c.column === 'done') doneCount++;
+      });
+    });
+    
+    if (todoEl) todoEl.textContent = todoCount;
+    if (progressEl) progressEl.textContent = inProgressCount;
+    if (doneEl) doneEl.textContent = doneCount;
+  }
+  
+  // Account page features
+  if (document.body.id === 'page-account') {
+    renderAchievements();
+    
+    // Update stats
+    const stats = getStats();
+    const boardsEl = document.getElementById('stat-boards');
+    const completedEl = document.getElementById('stat-completed');
+    const streakEl = document.getElementById('stat-streak');
+    
+    if (boardsEl) boardsEl.textContent = stats.totalBoards;
+    if (completedEl) completedEl.textContent = stats.totalCompleted;
+    if (streakEl) streakEl.textContent = stats.streak;
+  }
 
   // If this is a board detail page, initialize board UI
   const params = new URLSearchParams(window.location.search);
@@ -391,21 +703,66 @@ function initBoardDetail(boardId){
   setupBoardInteractions(board);
 }
 
+// Urgency helper: returns urgency level based on due date
+function getUrgency(dueDate){
+  if (!dueDate) return { level: 'none', label: '', class: '' };
+  const now = Date.now();
+  const due = new Date(dueDate).getTime();
+  const hoursLeft = (due - now) / (1000 * 60 * 60);
+  if (hoursLeft < 0) return { level: 'overdue', label: 'Overdue', class: 'urgency-overdue' };
+  if (hoursLeft < 24) return { level: 'urgent', label: 'Due Today', class: 'urgency-urgent' };
+  if (hoursLeft < 72) return { level: 'soon', label: 'Due Soon', class: 'urgency-soon' };
+  return { level: 'normal', label: '', class: '' };
+}
+
+// Priority labels and sort order
+const PRIORITY_ORDER = { high: 0, medium: 1, low: 2, undefined: 3 };
+
+function sortCards(cards){
+  return [...cards].sort((a, b) => {
+    // Sort by priority first
+    const pa = PRIORITY_ORDER[a.priority] ?? 3;
+    const pb = PRIORITY_ORDER[b.priority] ?? 3;
+    if (pa !== pb) return pa - pb;
+    // Then by due date (earliest first, no date last)
+    const da = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+    const db = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+    return da - db;
+  });
+}
+
 function renderBoardColumns(board){
   const cols = ['todo','inprogress','done'];
   cols.forEach(col => {
     const list = document.getElementById('col-'+col);
     if (!list) return;
     list.innerHTML = '';
-    const items = (board.cards||[]).filter(c=>c.column===col);
+    const items = sortCards((board.cards||[]).filter(c=>c.column===col));
     items.forEach(card => {
       const el = document.createElement('div');
       el.className = 'card-item';
       el.draggable = true;
       el.dataset.cardId = card.id;
-    // show title, short description and (optional) due date
-    const dueText = card.dueDate ? `<div class="small text-muted">Due: ${escapeHtml(formatDate(card.dueDate))}</div>` : '';
-    el.innerHTML = `<div><strong>${escapeHtml(card.title)}</strong></div><div class="small text-muted">${card.description||''}</div>${dueText}`;
+
+      // Urgency indicator
+      const urgency = getUrgency(card.dueDate);
+      if (urgency.class) el.classList.add(urgency.class);
+
+      // Point weight badge (top-left)
+      const pointWeight = card.points || 10;
+      const pointBadge = `<span class="point-badge" title="${pointWeight} points">${pointWeight} pts</span>`;
+
+      // Priority badge
+      const priorityBadge = card.priority ? `<span class="priority-badge priority-${card.priority}">${card.priority.charAt(0).toUpperCase() + card.priority.slice(1)}</span>` : '';
+
+      // Due date with urgency label
+      let dueText = '';
+      if (card.dueDate) {
+        const urgLabel = urgency.label ? ` <span class="urgency-label">${urgency.label}</span>` : '';
+        dueText = `<div class="small text-muted">Due: ${escapeHtml(formatDate(card.dueDate))}${urgLabel}</div>`;
+      }
+
+      el.innerHTML = `${pointBadge}${priorityBadge}<div><strong>${escapeHtml(card.title)}</strong></div><div class="small text-muted">${card.description||''}</div>${dueText}`;
       // attach drag handlers
       el.addEventListener('dragstart', onDragStart);
       el.addEventListener('dragend', onDragEnd);
@@ -416,7 +773,7 @@ function renderBoardColumns(board){
         btnWrap.className = 'mt-2';
         const btn = document.createElement('button');
         btn.className = 'btn btn-sm btn-success';
-        const REWARD_PER_TASK = 10; // points per redeemed completed task
+        const REWARD_PER_TASK = card.points || 10; // points per redeemed completed task (configurable per card)
         if (card.redeemed) {
           btn.textContent = 'Redeemed';
           btn.disabled = true;
@@ -432,6 +789,16 @@ function renderBoardColumns(board){
             // award points and mark card redeemed
             try {
               earnPoints(REWARD_PER_TASK);
+              // Update streak
+              updateStreak();
+              // Trigger confetti celebration
+              if (typeof confetti === 'function') {
+                confetti({
+                  particleCount: 100,
+                  spread: 70,
+                  origin: { y: 0.6 }
+                });
+              }
             } catch(err) {
               console.error('Error awarding points', err);
             }
@@ -462,30 +829,43 @@ function renderBoardColumns(board){
 }
 
 function setupBoardInteractions(board){
-  // add card forms
-  $all('.add-card-form').forEach(form => {
-    form.addEventListener('submit', ev => {
+  // Wire new task form submission
+  const newTaskForm = document.getElementById('new-task-form');
+  if (newTaskForm) {
+    // Reset form when modal opens
+    const modalEl = document.getElementById('newTaskModal');
+    if (modalEl) {
+      modalEl.addEventListener('show.bs.modal', () => {
+        document.getElementById('new-task-title').value = '';
+        document.getElementById('new-task-desc').value = '';
+        document.getElementById('new-task-column').value = 'todo';
+        document.getElementById('new-task-duedate').value = '';
+        document.getElementById('new-task-priority').value = '';
+        document.getElementById('new-task-points').value = '10';
+      });
+    }
+    
+    newTaskForm.addEventListener('submit', ev => {
       ev.preventDefault();
-      const input = form.querySelector('.new-card-title');
-      const desc = form.querySelector('.new-card-desc');
-      const due = form.querySelector('.new-card-duedate');
-      const column = form.dataset.column;
-      const title = input.value.trim();
-      const description = desc ? desc.value.trim() : '';
-      const dueVal = due && due.value ? due.value : '';
+      const column = document.getElementById('new-task-column').value;
+      const title = document.getElementById('new-task-title').value.trim();
+      const description = document.getElementById('new-task-desc').value.trim();
+      const dueVal = document.getElementById('new-task-duedate').value;
+      const priority = document.getElementById('new-task-priority').value;
+      const points = parseInt(document.getElementById('new-task-points').value, 10) || 10;
       if (!title) return;
-      const card = { id: 'c_'+Math.random().toString(36).slice(2,9), title, description, column };
+      const card = { id: 'c_'+Math.random().toString(36).slice(2,9), title, description, column, priority, points };
       if (dueVal) card.dueDate = new Date(dueVal).toISOString();
       board.cards = board.cards || [];
       board.cards.push(card);
       board.updatedAt = Date.now();
       save();
       renderBoardColumns(board);
-      input.value = '';
-      if (desc) desc.value = '';
-      if (due) due.value = '';
+      const modalEl = document.getElementById('newTaskModal');
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) modal.hide();
     });
-  });
+  }
 
   // columns dragover/drop
   $all('.board-column').forEach(colEl => {
@@ -563,6 +943,8 @@ function openTaskModal(board, cardId){
   const titleInput = document.getElementById('task-edit-title');
   const descInput = document.getElementById('task-edit-desc');
   const dueInput = document.getElementById('task-edit-duedate');
+  const priorityInput = document.getElementById('task-edit-priority');
+  const pointsInput = document.getElementById('task-edit-points');
 
   // ensure previous listeners are not duplicated: replace by cloning the node
   const newToggle = toggle.cloneNode(true);
@@ -576,6 +958,8 @@ function openTaskModal(board, cardId){
   titleInput.value = card.title || '';
   descInput.value = card.description || '';
   dueInput.value = card.dueDate ? new Date(card.dueDate).toISOString().slice(0,16) : '';
+  if (priorityInput) priorityInput.value = card.priority || '';
+  if (pointsInput) pointsInput.value = card.points || 10;
 
   // toggle handler
   newToggle.addEventListener('click', ()=>{
@@ -606,6 +990,8 @@ function openTaskModal(board, cardId){
     c.title = titleInput.value.trim() || c.title;
     c.description = descInput.value.trim() || '';
     c.dueDate = dueInput.value ? new Date(dueInput.value).toISOString() : null;
+    c.priority = priorityInput ? priorityInput.value : c.priority;
+    c.points = pointsInput ? parseInt(pointsInput.value, 10) || 10 : c.points;
     b.updatedAt = Date.now();
     save();
     renderBoardColumns(b);
