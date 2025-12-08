@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quest Log — Calendar</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="assets/css/style.css" rel="stylesheet">
+  <style>
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+    }
+    .calendar-day {
+      aspect-ratio: 1;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 0.5rem;
+      background: white;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+    }
+    .calendar-day-header {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    .calendar-day.today {
+      border-color: #0d6efd;
+      background: #e7f1ff;
+    }
+    .calendar-day.other-month {
+      opacity: 0.4;
+    }
+    .calendar-task {
+      font-size: 0.7rem;
+      padding: 2px 4px;
+      border-radius: 3px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .calendar-task:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .calendar-task.priority-urgent { background: #f8d7da; border-left: 3px solid #dc3545; }
+    .calendar-task.priority-high { background: #ffe5d0; border-left: 3px solid #fd7e14; }
+    .calendar-task.priority-medium { background: #fff3cd; border-left: 3px solid #ffc107; }
+    .calendar-task.priority-low { background: #d4edda; border-left: 3px solid #28a745; }
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .calendar-header-day {
+      text-align: center;
+      font-weight: 600;
+      padding: 0.5rem;
+    }
+  </style>
+</head>
+<body id="page-calendar">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <button class="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
+        aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="d-flex align-items-center">
+        <a href="account.html"
+          class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex justify-content-center align-items-center"
+          title="Account" style="width:38px;height:38px;padding:0;background:#fff">
+          <img src="https://via.placeholder.com/32" alt="avatar" class="rounded-circle"
+            style="width:32px;height:32px;">
+        </a>
+      </div>
+
+      <a class="navbar-brand fw-bold ms-3 me-3" href="index.html">Quest Log</a>
+
+      <div class="d-flex align-items-center me-3">
+        <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 0.9rem;" title="Your total points">
+          <i class="bi bi-star-fill"></i> <span id="nav-points-value">0</span> pts
+        </span>
+      </div>
+
+      <form class="d-none d-md-flex ms-3 me-3" role="search">
+        <input id="nav-search" class="form-control form-control-sm" type="search"
+          placeholder="Search tasks, boards..." aria-label="Search">
+      </form>
+
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
+          <li class="nav-item"><a class="nav-link active" href="calendar.html">Calendar</a></li>
+          <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h3">Calendar View</h1>
+      <div class="d-flex gap-2">
+        <button class="btn btn-sm btn-outline-secondary" id="prev-month">
+          <i class="bi bi-chevron-left"></i> Previous
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" id="today-btn">Today</button>
+        <button class="btn btn-sm btn-outline-secondary" id="next-month">
+          Next <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="mb-3" id="current-month-year">December 2025</h5>
+        
+        <div class="calendar-header">
+          <div class="calendar-header-day">Sun</div>
+          <div class="calendar-header-day">Mon</div>
+          <div class="calendar-header-day">Tue</div>
+          <div class="calendar-header-day">Wed</div>
+          <div class="calendar-header-day">Thu</div>
+          <div class="calendar-header-day">Fri</div>
+          <div class="calendar-header-day">Sat</div>
+        </div>
+
+        <div class="calendar-grid" id="calendar-grid">
+          <!-- Calendar days will be populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h6>Legend</h6>
+            <div class="d-flex flex-column gap-2">
+              <div><span class="calendar-task priority-urgent" style="display:inline-block;width:100px;">Urgent</span> Critical tasks</div>
+              <div><span class="calendar-task priority-high" style="display:inline-block;width:100px;">High</span> Important tasks</div>
+              <div><span class="calendar-task priority-medium" style="display:inline-block;width:100px;">Medium</span> Normal tasks</div>
+              <div><span class="calendar-task priority-low" style="display:inline-block;width:100px;">Low</span> Low priority</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h6>Quick Stats</h6>
+            <p class="mb-1"><strong id="tasks-this-month">0</strong> tasks this month</p>
+            <p class="mb-1"><strong id="tasks-due-soon">0</strong> due this week</p>
+            <p class="mb-0"><strong id="tasks-overdue">0</strong> overdue</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    // Calendar view with real task data integration
+    let currentDate = new Date();
+
+    function getAllTasksWithDueDates() {
+      const boards = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      const tasks = [];
+      
+      boards.forEach(board => {
+        if (board.cards && Array.isArray(board.cards)) {
+          board.cards.forEach(card => {
+            if (card.dueDate) {
+              tasks.push({
+                ...card,
+                boardId: board.id,
+                boardName: board.name
+              });
+            }
+          });
+        }
+      });
+      
+      return tasks;
+    }
+
+    function renderCalendar() {
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      
+      // Update header
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+      document.getElementById('current-month-year').textContent = `${monthNames[month]} ${year}`;
+      
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrevMonth = new Date(year, month, 0).getDate();
+      
+      const grid = document.getElementById('calendar-grid');
+      grid.innerHTML = '';
+      
+      const today = new Date();
+      const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+      
+      // Get all tasks with due dates
+      const allTasks = getAllTasksWithDueDates();
+      
+      // Previous month days
+      for (let i = firstDay - 1; i >= 0; i--) {
+        const day = daysInPrevMonth - i;
+        const dayEl = createDayElement(day, 'other-month', year, month - 1);
+        grid.appendChild(dayEl);
+      }
+      
+      // Current month days
+      for (let day = 1; day <= daysInMonth; day++) {
+        const isToday = isCurrentMonth && day === today.getDate();
+        const dayEl = createDayElement(day, isToday ? 'today' : '', year, month);
+        
+        // Add tasks for this day
+        const dayTasks = allTasks.filter(task => {
+          const taskDate = new Date(task.dueDate);
+          return taskDate.getDate() === day && 
+                 taskDate.getMonth() === month && 
+                 taskDate.getFullYear() === year;
+        });
+        
+        dayTasks.forEach(task => {
+          const taskEl = document.createElement('div');
+          taskEl.className = `calendar-task priority-${task.priority || 'low'}`;
+          taskEl.textContent = task.title;
+          taskEl.title = `${task.title} (${task.boardName}) - Click to open board`;
+          taskEl.style.cursor = 'pointer';
+          taskEl.addEventListener('click', () => {
+            // Navigate to the board containing this task
+            window.location.href = `board.html?id=${task.boardId}`;
+          });
+          dayEl.appendChild(taskEl);
+        });
+        
+        grid.appendChild(dayEl);
+      }
+      
+      // Next month days
+      const totalCells = grid.children.length;
+      const remainingCells = 42 - totalCells; // 6 rows × 7 days
+      for (let day = 1; day <= remainingCells; day++) {
+        const dayEl = createDayElement(day, 'other-month', year, month + 1);
+        grid.appendChild(dayEl);
+      }
+      
+      updateStats(allTasks);
+    }
+    
+    function createDayElement(day, className, year, month) {
+      const div = document.createElement('div');
+      div.className = `calendar-day ${className}`;
+      div.innerHTML = `<div class="calendar-day-header">${day}</div>`;
+      return div;
+    }
+    
+    function updateStats(allTasks) {
+      const now = new Date();
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+      
+      // Tasks this month
+      const tasksThisMonth = allTasks.filter(task => {
+        const taskDate = new Date(task.dueDate);
+        return taskDate.getMonth() === currentMonth && taskDate.getFullYear() === currentYear;
+      });
+      
+      // Tasks due this week
+      const weekFromNow = new Date(now);
+      weekFromNow.setDate(weekFromNow.getDate() + 7);
+      const tasksDueSoon = allTasks.filter(task => {
+        const taskDate = new Date(task.dueDate);
+        return taskDate >= now && taskDate <= weekFromNow && task.column !== 'done';
+      });
+      
+      // Overdue tasks
+      const overdueTasks = allTasks.filter(task => {
+        const taskDate = new Date(task.dueDate);
+        return taskDate < now && task.column !== 'done';
+      });
+      
+      document.getElementById('tasks-this-month').textContent = tasksThisMonth.length;
+      document.getElementById('tasks-due-soon').textContent = tasksDueSoon.length;
+      document.getElementById('tasks-overdue').textContent = overdueTasks.length;
+    }
+    
+    document.getElementById('prev-month').addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() - 1);
+      renderCalendar();
+    });
+    
+    document.getElementById('next-month').addEventListener('click', () => {
+      currentDate.setMonth(currentDate.getMonth() + 1);
+      renderCalendar();
+    });
+    
+    document.getElementById('today-btn').addEventListener('click', () => {
+      currentDate = new Date();
+      renderCalendar();
+    });
+    
+    renderCalendar();
+  </script>
+</body>
+</html>
