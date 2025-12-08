@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Productivity App — Boards</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="assets/css/style.css" rel="stylesheet">
 </head>
 <body id="page-boards">
@@ -22,6 +23,12 @@
 
       <a class="navbar-brand fw-bold ms-3 me-3" href="index.html">Quest Log</a>
 
+      <div class="d-flex align-items-center me-3">
+        <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 0.9rem;" title="Your total points">
+          <i class="bi bi-star-fill"></i> <span id="nav-points-value">0</span> pts
+        </span>
+      </div>
+
       <form class="d-none d-md-flex ms-3 me-3" role="search">
         <input id="nav-search" class="form-control form-control-sm" type="search" placeholder="Search tasks, boards..." aria-label="Search">
       </form>
@@ -29,6 +36,7 @@
       <div class="collapse navbar-collapse" id="nav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
+          <li class="nav-item"><a class="nav-link" href="calendar.html">Calendar</a></li>
           <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
         </ul>
       </div>
@@ -83,15 +91,31 @@
                       <span class="bg-preview" style="background:#6f42c1"></span>
                     </label>
                     <label class="bg-choice btn p-0">
+                      <input type="radio" name="board-bg" value="#198754">
+                      <span class="bg-preview" style="background:#198754"></span>
+                    </label>
+                    <label class="bg-choice btn p-0">
+                      <input type="radio" name="board-bg" value="#dc3545">
+                      <span class="bg-preview" style="background:#dc3545"></span>
+                    </label>
+                    <label class="bg-choice btn p-0">
+                      <input type="radio" name="board-bg" value="#fd7e14">
+                      <span class="bg-preview" style="background:#fd7e14"></span>
+                    </label>
+                    <label class="bg-choice btn p-0">
+                      <input type="radio" name="board-bg" value="#20c997">
+                      <span class="bg-preview" style="background:#20c997"></span>
+                    </label>
+                    <label class="bg-choice btn p-0">
+                      <input type="radio" name="board-bg" value="linear-gradient(135deg,#667eea 0%,#764ba2 100%)">
+                      <span class="bg-preview" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)"></span>
+                    </label>
+                    <label class="bg-choice btn p-0">
                       <input type="radio" name="board-bg" value="linear-gradient(135deg,#f6d365 0%,#fda085 100%)">
                       <span class="bg-preview" style="background:linear-gradient(135deg,#f6d365 0%,#fda085 100%)"></span>
                     </label>
-                    <label class="bg-choice btn p-0">
-                      <input type="radio" name="board-bg" value="url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80') center/cover">
-                      <span class="bg-preview" style="background:url('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80') center/cover"></span>
-                    </label>
                   </div>
-                  <div class="form-text">Pick a background for the board (preview above).</div>
+                  <div class="form-text">Pick a color or gradient for the board (preview above).</div>
                 </div>
             </div>
             <div class="modal-footer d-flex justify-content-between align-items-center">
@@ -111,6 +135,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>

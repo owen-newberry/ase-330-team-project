@@ -1,152 +1,384 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Quest Log — Home</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-</head>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="assets/css/style.css" rel="stylesheet" />
+  </head>
 
-<body id="page-home">
+  <body id="page-home">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <div class="container">
-            <button class="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
-                aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+      <div class="container">
+        <button
+          class="navbar-toggler me-2"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#nav"
+          aria-controls="nav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <div class="d-flex align-items-center">
-                <a href="account.html"
-                    class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex justify-content-center align-items-center"
-                    title="Account" style="width:38px;height:38px;padding:0;background:#fff">
-                    <img src="https://via.placeholder.com/32" alt="avatar" class="rounded-circle"
-                        style="width:32px;height:32px;">
-                </a>
-            </div>
-
-            <a class="navbar-brand fw-bold ms-3 me-3" href="index.html">Quest Log</a>
-
-            <form class="d-none d-md-flex ms-3 me-3" role="search">
-                <input id="nav-search" class="form-control form-control-sm" type="search"
-                    placeholder="Search tasks, boards..." aria-label="Search">
-            </form>
-
-            <div class="collapse navbar-collapse" id="nav">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
-                    <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
-                </ul>
+        <div class="d-flex align-items-center">
+          <a
+            href="account.html"
+            class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex justify-content-center align-items-center"
+            title="Account"
+            style="width: 38px; height: 38px; padding: 0; background: #fff"
+          >
+            <img
+              src="https://via.placeholder.com/32"
+              alt="avatar"
+              class="rounded-circle"
+              style="width: 32px; height: 32px"
+            />
+          </a>
         </div>
+
+        <a class="navbar-brand fw-bold ms-3 me-3" href="index.html"
+          >Quest Log</a
+        >
+
+        <div class="d-flex align-items-center me-3">
+          <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 0.9rem;" title="Your total points">
+            <i class="bi bi-star-fill"></i> <span id="nav-points-value">0</span> pts
+          </span>
         </div>
+
+        <form class="d-none d-md-flex ms-3 me-3" role="search">
+          <input
+            id="nav-search"
+            class="form-control form-control-sm"
+            type="search"
+            placeholder="Search tasks, boards..."
+            aria-label="Search"
+          />
+        </form>
+
+        <div class="collapse navbar-collapse" id="nav">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link" href="boards.html">Boards</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="calendar.html">Calendar</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="rewards.html">Rewards</a>
+            </li>
+          </ul>
+        </div>
+      </div>
     </nav>
 
     <main class="container my-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h1 class="h3">Home dashboard</h1>
-            <div>
-                <span class="me-2">Points: <strong id="points-badge">—</strong></span>
-                <a class="btn btn-sm btn-outline-primary" href="rewards.html">Redeem</a>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3">Home dashboard</h1>
+        <div>
+          <span class="me-2">Points: <strong id="points-badge">—</strong></span>
+          <a class="btn btn-sm btn-outline-primary" href="rewards.html"
+            >Redeem</a
+          >
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">All boards</h5>
+
+              <section class="mt-4">
+                <h5 class="mb-2">Boards</h5>
+                <div class="horizontal-gallery d-flex overflow-auto pb-2">
+                  <a
+                    href="boards.html"
+                    class="card card-item p-2 me-3 text-decoration-none text-dark"
+                    style="min-width: 200px; flex: 0 0 auto"
+                  >
+                    <div class="card-body">
+                      <h6 class="card-title">Product Board</h6>
+                      <p class="small text-muted mb-0">3 columns • 12 cards</p>
+                    </div>
+                  </a>
+                  <a
+                    href="boards.html"
+                    class="card card-item p-2 me-3 text-decoration-none text-dark"
+                    style="min-width: 200px; flex: 0 0 auto"
+                  >
+                    <div class="card-body">
+                      <h6 class="card-title">Marketing</h6>
+                      <p class="small text-muted mb-0">2 columns • 5 cards</p>
+                    </div>
+                  </a>
+                </div>
+              </section>
+
+              <hr class="my-4" />
             </div>
+          </div>
+
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Upcoming tasks</h5>
+              <ul id="upcoming-list" class="list-group list-group-flush">
+                <section class="mt-4">
+                  <!-- Horizontally scrollable galleries -->
+                  <h5 class="mb-2">Your tasks</h5>
+                  <div class="horizontal-gallery d-flex overflow-auto pb-2">
+                    <div
+                      class="card card-item p-2 me-3"
+                      style="min-width: 220px; flex: 0 0 auto"
+                    >
+                      <div class="card-body">
+                        <h6 class="card-title">Finish proposal</h6>
+                        <p class="small text-muted mb-1">Due: Tomorrow</p>
+                        <p class="mb-0">Review and send to stakeholders.</p>
+                      </div>
+                    </div>
+                    <div
+                      class="card card-item p-2 me-3"
+                      style="min-width: 220px; flex: 0 0 auto"
+                    >
+                      <div class="card-body">
+                        <h6 class="card-title">Design review</h6>
+                        <p class="small text-muted mb-1">Due: Fri</p>
+                        <p class="mb-0">Go through latest mockups.</p>
+                      </div>
+                    </div>
+                    <div
+                      class="card card-item p-2 me-3"
+                      style="min-width: 220px; flex: 0 0 auto"
+                    >
+                      <div class="card-body">
+                        <h6 class="card-title">Quick bugfix</h6>
+                        <p class="small text-muted mb-1">Due: Today</p>
+                        <p class="mb-0">Patch login redirect issue.</p>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              </ul>
+            </div>
+          </div>
         </div>
 
-        <div class="row g-3">
-            <div class="col-lg-8">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">All boards</h5>
-                        
-                        <section class="mt-4">
-                            <h5 class="mb-2">Boards</h5>
-                            <div class="horizontal-gallery d-flex overflow-auto pb-2">
-                                <a href="boards.html" class="card card-item p-2 me-3 text-decoration-none text-dark"
-                                    style="min-width:200px;flex:0 0 auto;">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Product Board</h6>
-                                        <p class="small text-muted mb-0">3 columns • 12 cards</p>
-                                    </div>
-                                </a>
-                                <a href="boards.html" class="card card-item p-2 me-3 text-decoration-none text-dark"
-                                    style="min-width:200px;flex:0 0 auto;">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Marketing</h6>
-                                        <p class="small text-muted mb-0">2 columns • 5 cards</p>
-                                    </div>
-                                </a>
-                            </div>
-                        </section>
-
-                        <hr class="my-4">
-
-                    </div>
+        <div class="col-lg-4">
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Stats</h5>
+              <div class="row text-center">
+                <div class="col-4">
+                  <h6 id="stat-todo">0</h6>
+                  <small class="text-muted">To Do</small>
                 </div>
-
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Upcoming tasks</h5>
-                        <ul id="upcoming-list" class="list-group list-group-flush">
-                            <section class="mt-4">
-                            <!-- Horizontally scrollable galleries -->
-                                <h5 class="mb-2">Your tasks</h5>
-                            <div class="horizontal-gallery d-flex overflow-auto pb-2">
-                                <div class="card card-item p-2 me-3" style="min-width:220px;flex:0 0 auto;">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Finish proposal</h6>
-                                        <p class="small text-muted mb-1">Due: Tomorrow</p>
-                                        <p class="mb-0">Review and send to stakeholders.</p>
-                                    </div>
-                                </div>
-                                <div class="card card-item p-2 me-3" style="min-width:220px;flex:0 0 auto;">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Design review</h6>
-                                        <p class="small text-muted mb-1">Due: Fri</p>
-                                        <p class="mb-0">Go through latest mockups.</p>
-                                    </div>
-                                </div>
-                                <div class="card card-item p-2 me-3" style="min-width:220px;flex:0 0 auto;">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Quick bugfix</h6>
-                                        <p class="small text-muted mb-1">Due: Today</p>
-                                        <p class="mb-0">Patch login redirect issue.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
-                        </ul>
-                    </div>
+                <div class="col-4">
+                  <h6 id="stat-progress">0</h6>
+                  <small class="text-muted">In Progress</small>
                 </div>
-
+                <div class="col-4">
+                  <h6 id="stat-done">0</h6>
+                  <small class="text-muted">Done</small>
+                </div>
+              </div>
+              <hr />
+              <a href="boards.html" class="btn btn-sm btn-outline-secondary"
+                >Open Boards</a
+              >
             </div>
+          </div>
 
-            <div class="col-lg-4">
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Stats</h5>
-                        <div class="row text-center">
-                            <div class="col-4">
-                                <h6 id="stat-todo">0</h6>
-                                <small class="text-muted">To Do</small>
-                            </div>
-                            <div class="col-4">
-                                <h6 id="stat-progress">0</h6>
-                                <small class="text-muted">In Progress</small>
-                            </div>
-                            <div class="col-4">
-                                <h6 id="stat-done">0</h6>
-                                <small class="text-muted">Done</small>
-                            </div>
-                        </div>
-                        <hr>
-                        <a href="boards.html" class="btn btn-sm btn-outline-secondary">Open Boards</a>
-                    </div>
-                </div>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">
+                Achievements <i class="bi bi-trophy-fill text-warning"></i>
+              </h5>
+              <div id="badges-container" class="d-flex flex-wrap gap-2">
+                <!-- Badges will be populated by JS -->
+              </div>
+              <div class="mt-2 small text-muted">
+                Complete tasks to unlock badges!
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/app.js"></script>
-</body>
+    <!-- Tutorial Modal for First-Time Users -->
+    <div
+      class="modal fade"
+      id="tutorialModal"
+      tabindex="-1"
+      aria-labelledby="tutorialModalLabel"
+      aria-hidden="true"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-0">
+            <h5 class="modal-title" id="tutorialModalLabel">
+              Welcome to Quest Log! 🎯
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <!-- Tutorial Step 1 -->
+            <div class="tutorial-step" id="tutorial-step-1">
+              <div class="text-center mb-3">
+                <div class="display-1">📋</div>
+              </div>
+              <h5 class="mb-3">Create Your First Board</h5>
+              <p>
+                Boards are where you organize your tasks. Think of them as
+                project workspaces where you can manage everything in one place.
+              </p>
+              <ul class="list-unstyled">
+                <li class="mb-2">
+                  ✓ Click <strong>"Boards"</strong> in the navigation
+                </li>
+                <li class="mb-2">
+                  ✓ Then click <strong>"+ New board"</strong>
+                </li>
+                <li class="mb-2">✓ Give it a name and choose a background</li>
+              </ul>
+            </div>
 
+            <!-- Tutorial Step 2 -->
+            <div class="tutorial-step d-none" id="tutorial-step-2">
+              <div class="text-center mb-3">
+                <div class="display-1">📝</div>
+              </div>
+              <h5 class="mb-3">Add Tasks to Your Board</h5>
+              <p>
+                Each board has three columns: <strong>To Do</strong>,
+                <strong>In Progress</strong>, and <strong>Done</strong>.
+              </p>
+              <ul class="list-unstyled">
+                <li class="mb-2">✓ Add tasks by typing in the input field</li>
+                <li class="mb-2">✓ Drag tasks between columns as you work</li>
+                <li class="mb-2">
+                  ✓ Add descriptions to keep track of details
+                </li>
+              </ul>
+            </div>
+
+            <!-- Tutorial Step 3 -->
+            <div class="tutorial-step d-none" id="tutorial-step-3">
+              <div class="text-center mb-3">
+                <div class="display-1">🏆</div>
+              </div>
+              <h5 class="mb-3">Earn Points & Rewards</h5>
+              <p>Complete tasks to earn points and redeem them for rewards!</p>
+              <ul class="list-unstyled">
+                <li class="mb-2">
+                  ✓ Move tasks to <strong>"Done"</strong> column
+                </li>
+                <li class="mb-2">
+                  ✓ Click <strong>"Redeem"</strong> button to earn points
+                </li>
+                <li class="mb-2">
+                  ✓ Set goals in the <strong>Rewards</strong> page
+                </li>
+                <li class="mb-2">✓ Track your progress toward your goals</li>
+              </ul>
+            </div>
+
+            <!-- Tutorial Step 4 -->
+            <div class="tutorial-step d-none" id="tutorial-step-4">
+              <div class="text-center mb-3">
+                <div class="display-1">🚀</div>
+              </div>
+              <h5 class="mb-3">You're All Set!</h5>
+              <p>
+                You now know the basics of Quest Log. Here are some tips to get
+                started:
+              </p>
+              <ul class="list-unstyled">
+                <li class="mb-2">
+                  📊 <strong>Dashboard:</strong> View all your boards and tasks
+                </li>
+                <li class="mb-2">
+                  🔍 <strong>Search:</strong> Quickly find tasks and boards
+                </li>
+                <li class="mb-2">
+                  👤 <strong>Account:</strong> Manage your profile and settings
+                </li>
+                <li class="mb-2">
+                  🎁 <strong>Rewards:</strong> Set goals and track points
+                </li>
+              </ul>
+              <div class="alert alert-info mt-3">
+                <small
+                  ><strong>Tip:</strong> You can restart this tutorial anytime
+                  from your Account page.</small
+                >
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer border-0">
+            <div
+              class="d-flex justify-content-between align-items-center w-100"
+            >
+              <div>
+                <span class="badge bg-secondary" id="tutorial-progress"
+                  >1 of 4</span
+                >
+              </div>
+              <div>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  id="tutorial-skip"
+                >
+                  Skip Tutorial
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  id="tutorial-prev"
+                  style="display: none"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="tutorial-next"
+                >
+                  Next
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-success"
+                  id="tutorial-finish"
+                  style="display: none"
+                >
+                  Get Started!
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
 </html>
