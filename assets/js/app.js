@@ -547,6 +547,65 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if (todoEl) todoEl.textContent = todoCount;
     if (progressEl) progressEl.textContent = inProgressCount;
     if (doneEl) doneEl.textContent = doneCount;
+
+    // Upcoming tasks for the current week (across all boards)
+    const upcomingEl = document.getElementById('upcoming-list');
+    if (upcomingEl) {
+      const now = Date.now();
+      const weekAhead = now + 1000 * 60 * 60 * 24 * 7;
+      const upcoming = [];
+      boards.forEach(b => {
+        (b.cards || []).forEach(c => {
+          if (c.dueDate) {
+            const t = new Date(c.dueDate).getTime();
+            if (t >= now && t <= weekAhead) upcoming.push(Object.assign({}, c, { boardName: b.name, boardId: b.id }));
+          }
+        });
+      });
+      upcoming.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+      // If fewer than targetCount upcoming items, include the next nearest due tasks (beyond the week)
+      const TARGET_COUNT = 5;
+      if (upcoming.length < TARGET_COUNT) {
+        // collect candidate future tasks (after weekAhead) not already included
+        const includedIds = new Set(upcoming.map(x=>x.id));
+        const futureCandidates = [];
+        boards.forEach(b => {
+          (b.cards || []).forEach(c => {
+            if (c.dueDate) {
+              const t = new Date(c.dueDate).getTime();
+              if (t > weekAhead && !includedIds.has(c.id)) {
+                futureCandidates.push(Object.assign({}, c, { boardName: b.name, boardId: b.id }));
+              }
+            }
+          });
+        });
+        futureCandidates.sort((a,b)=> new Date(a.dueDate) - new Date(b.dueDate));
+        for (let i=0; i<futureCandidates.length && upcoming.length < TARGET_COUNT; i++) {
+          upcoming.push(futureCandidates[i]);
+        }
+      }
+      if (upcoming.length === 0) {
+        upcomingEl.innerHTML = '<div class="text-muted">No upcoming tasks this week.</div>';
+      } else {
+        let html = '<div class="horizontal-gallery d-flex overflow-auto pb-2">';
+        upcoming.forEach(t => {
+          const urg = getUrgency(t.dueDate);
+          const urgClass = urg.class ? urg.class : '';
+          const urgLabel = urg.label ? escapeHtml(urg.label) : '';
+          html += `
+            <div class="card card-item p-2 me-3 ${urgClass}" style="min-width:220px;flex:0 0 auto;">
+              <div class="card-body">
+                <h6 class="card-title">${escapeHtml(t.title)}</h6>
+                <p class="small text-muted mb-1">Due: ${escapeHtml(formatDate(t.dueDate))}${urgLabel ? ' — <span class="fw-semibold">'+urgLabel+'</span>' : ''}</p>
+                <p class="mb-0">${escapeHtml(t.description||'')}</p>
+                <div class="small text-muted mt-2">Board: ${escapeHtml(t.boardName)}</div>
+              </div>
+            </div>`;
+        });
+        html += '</div>';
+        upcomingEl.innerHTML = html;
+      }
+    }
   }
   
   // Account page features
@@ -821,6 +880,19 @@ function renderBoardColumns(board){
           });
         }
         btnWrap.appendChild(btn);
+        // add a remove button next to redeem so users can delete completed tasks
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-sm btn-outline-danger ms-2 remove-card';
+        removeBtn.textContent = 'Remove';
+        removeBtn.addEventListener('click', (e)=>{
+          e.preventDefault(); e.stopPropagation();
+          if (!confirm('Remove this task?')) return;
+          board.cards = (board.cards||[]).filter(c=>c.id !== card.id);
+          board.updatedAt = Date.now();
+          save();
+          renderBoardColumns(board);
+        });
+        btnWrap.appendChild(removeBtn);
         el.appendChild(btnWrap);
       }
 
@@ -828,6 +900,25 @@ function renderBoardColumns(board){
       el.addEventListener('click', (e)=>{
         openTaskModal(board, card.id);
       });
+
+      // add remove button for non-done cards
+      if (col !== 'done'){
+        const ctrlWrap = document.createElement('div');
+        ctrlWrap.className = 'mt-2 d-flex justify-content-end';
+        const rm = document.createElement('button');
+        rm.className = 'btn btn-sm btn-outline-danger remove-card';
+        rm.textContent = 'Remove';
+        rm.addEventListener('click', (e)=>{
+          e.preventDefault(); e.stopPropagation();
+          if (!confirm('Remove this task?')) return;
+          board.cards = (board.cards||[]).filter(c=>c.id !== card.id);
+          board.updatedAt = Date.now();
+          save();
+          renderBoardColumns(board);
+        });
+        ctrlWrap.appendChild(rm);
+        el.appendChild(ctrlWrap);
+      }
 
       list.appendChild(el);
     });
