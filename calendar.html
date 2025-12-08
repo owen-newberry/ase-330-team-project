@@ -43,6 +43,11 @@
       overflow: hidden;
       text-overflow: ellipsis;
       cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+    }
+    .calendar-task:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
     .calendar-task.priority-urgent { background: #f8d7da; border-left: 3px solid #dc3545; }
     .calendar-task.priority-high { background: #ffe5d0; border-left: 3px solid #fd7e14; }
@@ -174,19 +179,17 @@
       const tasks = [];
       
       boards.forEach(board => {
-        ['todo', 'inProgress', 'done'].forEach(column => {
-          if (board[column]) {
-            board[column].forEach(task => {
-              if (task.dueDate) {
-                tasks.push({
-                  ...task,
-                  boardName: board.name,
-                  column: column
-                });
-              }
-            });
-          }
-        });
+        if (board.cards && Array.isArray(board.cards)) {
+          board.cards.forEach(card => {
+            if (card.dueDate) {
+              tasks.push({
+                ...card,
+                boardId: board.id,
+                boardName: board.name
+              });
+            }
+          });
+        }
       });
       
       return tasks;
@@ -237,8 +240,13 @@
         dayTasks.forEach(task => {
           const taskEl = document.createElement('div');
           taskEl.className = `calendar-task priority-${task.priority || 'low'}`;
-          taskEl.textContent = task.text;
-          taskEl.title = `${task.text} (${task.boardName})`;
+          taskEl.textContent = task.title;
+          taskEl.title = `${task.title} (${task.boardName}) - Click to open board`;
+          taskEl.style.cursor = 'pointer';
+          taskEl.addEventListener('click', () => {
+            // Navigate to the board containing this task
+            window.location.href = `board.html?id=${task.boardId}`;
+          });
           dayEl.appendChild(taskEl);
         });
         

@@ -129,44 +129,12 @@
           <div class="card mb-3">
             <div class="card-body">
               <h5 class="card-title">Upcoming tasks</h5>
-              <ul id="upcoming-list" class="list-group list-group-flush">
-                <section class="mt-4">
-                  <!-- Horizontally scrollable galleries -->
-                  <h5 class="mb-2">Your tasks</h5>
-                  <div class="horizontal-gallery d-flex overflow-auto pb-2">
-                    <div
-                      class="card card-item p-2 me-3"
-                      style="min-width: 220px; flex: 0 0 auto"
-                    >
-                      <div class="card-body">
-                        <h6 class="card-title">Finish proposal</h6>
-                        <p class="small text-muted mb-1">Due: Tomorrow</p>
-                        <p class="mb-0">Review and send to stakeholders.</p>
-                      </div>
-                    </div>
-                    <div
-                      class="card card-item p-2 me-3"
-                      style="min-width: 220px; flex: 0 0 auto"
-                    >
-                      <div class="card-body">
-                        <h6 class="card-title">Design review</h6>
-                        <p class="small text-muted mb-1">Due: Fri</p>
-                        <p class="mb-0">Go through latest mockups.</p>
-                      </div>
-                    </div>
-                    <div
-                      class="card card-item p-2 me-3"
-                      style="min-width: 220px; flex: 0 0 auto"
-                    >
-                      <div class="card-body">
-                        <h6 class="card-title">Quick bugfix</h6>
-                        <p class="small text-muted mb-1">Due: Today</p>
-                        <p class="mb-0">Patch login redirect issue.</p>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </ul>
+              <div id="upcoming-tasks-container" class="horizontal-gallery d-flex overflow-auto pb-2">
+                <!-- Tasks will be populated by JavaScript -->
+              </div>
+              <div id="no-upcoming-tasks" class="text-muted small" style="display: none;">
+                No upcoming tasks with due dates. Create tasks with due dates to see them here!
+              </div>
             </div>
           </div>
         </div>

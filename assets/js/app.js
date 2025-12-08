@@ -504,6 +504,90 @@ function setupForm() {
   });
 }
 
+function renderUpcomingTasks() {
+  const container = document.getElementById("upcoming-tasks-container");
+  const noTasksMsg = document.getElementById("no-upcoming-tasks");
+  if (!container) return;
+  
+  // Get all tasks with due dates from all boards
+  const allTasks = [];
+  boards.forEach(board => {
+    if (board.cards && Array.isArray(board.cards)) {
+      board.cards.forEach(card => {
+        if (card.dueDate && card.column !== 'done') {
+          allTasks.push({
+            ...card,
+            boardId: board.id,
+            boardName: board.name
+          });
+        }
+      });
+    }
+  });
+  
+  // Sort by due date (earliest first)
+  allTasks.sort((a, b) => {
+    return new Date(a.dueDate) - new Date(b.dueDate);
+  });
+  
+  // Show only upcoming tasks (limit to first 10)
+  const upcomingTasks = allTasks.slice(0, 10);
+  
+  container.innerHTML = '';
+  
+  if (upcomingTasks.length === 0) {
+    if (noTasksMsg) noTasksMsg.style.display = 'block';
+    return;
+  }
+  
+  if (noTasksMsg) noTasksMsg.style.display = 'none';
+  
+  upcomingTasks.forEach(task => {
+    const card = document.createElement('div');
+    card.className = 'card card-item p-2 me-3';
+    card.style.minWidth = '220px';
+    card.style.flex = '0 0 auto';
+    card.style.cursor = 'pointer';
+    
+    const dueDate = new Date(task.dueDate);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    let dueDateText = dueDate.toLocaleDateString();
+    let dueDateClass = 'text-muted';
+    
+    if (dueDate.toDateString() === today.toDateString()) {
+      dueDateText = 'Due: Today';
+      dueDateClass = 'text-danger fw-bold';
+    } else if (dueDate.toDateString() === tomorrow.toDateString()) {
+      dueDateText = 'Due: Tomorrow';
+      dueDateClass = 'text-warning fw-bold';
+    } else if (dueDate < today) {
+      dueDateText = 'Overdue!';
+      dueDateClass = 'text-danger fw-bold';
+    } else {
+      const daysUntil = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+      dueDateText = `Due in ${daysUntil} day${daysUntil > 1 ? 's' : ''}`;
+    }
+    
+    card.innerHTML = `
+      <div class="card-body">
+        <h6 class="card-title">${escapeHtml(task.title)}</h6>
+        <p class="small ${dueDateClass} mb-1">${dueDateText}</p>
+        <p class="small text-muted mb-1"><i class="bi bi-folder"></i> ${escapeHtml(task.boardName)}</p>
+        ${task.description ? `<p class="mb-0 small">${escapeHtml(task.description)}</p>` : ''}
+      </div>
+    `;
+    
+    card.addEventListener('click', () => {
+      window.location.href = `board.html?board=${task.boardId}`;
+    });
+    
+    container.appendChild(card);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   load();
   setupForm();
@@ -513,6 +597,11 @@ document.addEventListener("DOMContentLoaded", () => {
   loadRewards();
   updatePointsDisplay();
   updateBadgesUI();
+  
+  // Initialize upcoming tasks on homepage
+  if (document.getElementById("upcoming-tasks-container")) {
+    renderUpcomingTasks();
+  }
 
   // wire background preview interactions
   wireBgPreview();
@@ -693,7 +782,19 @@ function renderBoardColumns(board) {
     const countBadge = document.getElementById(col + "-count");
     if (!list) return;
     list.innerHTML = "";
-    const items = (board.cards || []).filter((c) => c.column === col);
+    let items = (board.cards || []).filter((c) => c.column === col);
+    
+    // Auto-sort "To Do" column by due date (upcoming tasks first)
+    if (col === "todo") {
+      items.sort((a, b) => {
+        // Tasks with no due date go to the bottom
+        if (!a.dueDate && !b.dueDate) return 0;
+        if (!a.dueDate) return 1;
+        if (!b.dueDate) return -1;
+        // Sort by due date (earliest first)
+        return new Date(a.dueDate) - new Date(b.dueDate);
+      });
+    }
     
     // Update count badge
     if (countBadge) countBadge.textContent = items.length;
