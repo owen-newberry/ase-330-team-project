@@ -2,10 +2,19 @@
 const STORAGE_KEY = 'prod_boards_v1';
 const REWARDS_KEY = 'prod_rewards_v1';
 const STREAK_KEY = 'prod_streak_v1';
+const BADGES_KEY = 'prod_badges_v1';
+const STATS_KEY = 'prod_stats_v1';
+const CLAIMED_REWARDS_KEY = 'prod_claimed_rewards_v1';
 const HAS_VISITED = 'has_visited_site';
+const TUTORIAL_COMPLETED = 'tutorial_completed';
+
 let boards = [];
 let activeFilter = 'All';
 let currentCalendarMonth = new Date();
+let currentTutorialStep = 1;
+let userBadges = [];
+let userStats = { tasksCompleted: 0, streak: 0, lastCompletionDate: null, level: 1, xp: 0 };
+let currentBoard = null; // Track the currently viewed board
 
 // Motivational quotes
 const MOTIVATIONAL_QUOTES = [
@@ -19,7 +28,7 @@ const MOTIVATIONAL_QUOTES = [
   { text: "Small progress is still progress.", author: "Unknown" }
 ];
 
-// Achievements definitions
+// Achievements definitions (used on home/account pages)
 const ACHIEVEMENTS = [
   { id: 'first_task', title: 'First Steps', icon: '🎯', desc: 'Complete your first task', check: (stats) => stats.totalCompleted >= 1 },
   { id: 'five_tasks', title: 'Getting Started', icon: '⭐', desc: 'Complete 5 tasks', check: (stats) => stats.totalCompleted >= 5 },
@@ -31,17 +40,6 @@ const ACHIEVEMENTS = [
   { id: 'streak_three', title: 'Consistent', icon: '🔥', desc: '3 day streak', check: (stats) => stats.streak >= 3 },
   { id: 'streak_seven', title: 'Week Warrior', icon: '💪', desc: '7 day streak', check: (stats) => stats.streak >= 7 }
 ];
-const STORAGE_KEY = "prod_boards_v1";
-const REWARDS_KEY = "prod_rewards_v1";
-const BADGES_KEY = "prod_badges_v1";
-const STATS_KEY = "prod_stats_v1";
-const HAS_VISITED = "has_visited_site";
-const TUTORIAL_COMPLETED = "tutorial_completed";
-let boards = [];
-let activeFilter = "All";
-let currentTutorialStep = 1;
-let userBadges = [];
-let userStats = { tasksCompleted: 0, streak: 0, lastCompletionDate: null, level: 1, xp: 0 };
 
 function $(s) {
   return document.querySelector(s);
@@ -143,6 +141,44 @@ function renderMotivationalQuote() {
   if (authorEl) authorEl.textContent = `— ${quote.author}`;
 }
 
+// Render boards gallery on home page
+function renderHomeBoardsGallery() {
+  const gallery = document.getElementById('home-boards-gallery');
+  const noBoards = document.getElementById('no-boards-message');
+  if (!gallery) return;
+  
+  gallery.innerHTML = '';
+  
+  if (boards.length === 0) {
+    if (noBoards) noBoards.style.display = '';
+    return;
+  }
+  
+  if (noBoards) noBoards.style.display = 'none';
+  
+  boards.forEach(b => {
+    const cardCount = (b.cards || []).length;
+    const todoCount = (b.cards || []).filter(c => c.column === 'todo').length;
+    const inProgressCount = (b.cards || []).filter(c => c.column === 'inprogress').length;
+    const doneCount = (b.cards || []).filter(c => c.column === 'done').length;
+    
+    const a = document.createElement('a');
+    a.href = `board.html?board=${b.id}`;
+    a.className = 'card card-item p-2 me-3 text-decoration-none text-dark';
+    a.style.minWidth = '200px';
+    a.style.flex = '0 0 auto';
+    
+    a.innerHTML = `
+      <div class="card-body">
+        <h6 class="card-title">${escapeHtml(b.name)}</h6>
+        <p class="small text-muted mb-0">📋 ${todoCount} · 🔄 ${inProgressCount} · ✅ ${doneCount}</p>
+      </div>
+    `;
+    
+    gallery.appendChild(a);
+  });
+}
+
 // Calendar view
 function renderCalendar() {
   const grid = document.getElementById('calendar-grid');
@@ -171,20 +207,10 @@ function renderCalendar() {
   
   grid.innerHTML = '';
   
-  // Day headers
-  ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
-    const header = document.createElement('div');
-    header.className = 'text-center small fw-semibold py-1';
-    header.style.background = 'var(--bg-spot)';
-    header.textContent = day;
-    grid.appendChild(header);
-  });
-  
-  // Empty cells before first day
+  // Empty cells before first day (with other-month styling)
   for (let i = 0; i < firstDay; i++) {
     const empty = document.createElement('div');
-    empty.className = 'calendar-day';
-    empty.style.opacity = '0.3';
+    empty.className = 'calendar-day other-month';
     grid.appendChild(empty);
   }
   
@@ -214,12 +240,17 @@ function renderCalendar() {
     
     dayTasks.slice(0, 3).forEach(task => {
       const taskEl = document.createElement('div');
-      taskEl.className = 'calendar-task';
+      taskEl.className = `calendar-task priority-${task.priority || 'low'}`;
+      taskEl.style.cursor = 'pointer';
       // Format time (e.g., "2:30 PM")
       const dueTime = new Date(task.dueDate);
       const timeStr = dueTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
       taskEl.innerHTML = `${escapeHtml(task.title)} <span class="calendar-task-time">${timeStr}</span>`;
-      taskEl.title = `${task.title} at ${timeStr} (${task.boardName})`;
+      taskEl.title = `${task.title} at ${timeStr} (${task.boardName}) - Click to view`;
+      // Navigate to task detail on click
+      taskEl.addEventListener('click', () => {
+        window.location.href = `board.html?board=${task.boardId}&task=${task.id}`;
+      });
       cell.appendChild(taskEl);
     });
     
@@ -262,22 +293,8 @@ function load() {
       boards = [];
     }
   } else {
-    // sample seed data
-    boards = [
-      {
-        id: id(),
-        name: "Product Board",
-        updatedAt: Date.now() - 1000 * 60 * 60 * 24,
-        color: "#6f42c1",
-      },
-      {
-        id: id(),
-        name: "Marketing",
-        updatedAt: Date.now() - 1000 * 60 * 60 * 5,
-        color: "#198754",
-      },
-    ];
-    save();
+    // Start with empty boards
+    boards = [];
   }
   loadBadges();
   loadStats();
@@ -324,9 +341,11 @@ function loadRewards() {
 function saveRewards(){ localStorage.setItem(REWARDS_KEY, JSON.stringify(rewards)); }
 
 function updateRewardsUI(){
-  // Update points display in navbar (all pages)
+  // Update points display in navbar (all pages) - check both ID variants for consistency
   const navPtsEl = document.getElementById('nav-points');
+  const navPtsVal = document.getElementById('nav-points-value');
   if (navPtsEl) navPtsEl.textContent = String(rewards.points);
+  if (navPtsVal) navPtsVal.textContent = String(rewards.points);
   
   const ptsEl = document.getElementById('rewards-points');
   const accPtsEl = document.getElementById('account-points');
@@ -444,17 +463,91 @@ function removeGoal(id) {
   updateRewardsUI();
 }
 
+// Claimed rewards history
+function loadClaimedRewards() {
+  const raw = localStorage.getItem(CLAIMED_REWARDS_KEY);
+  if (raw) {
+    try { return JSON.parse(raw); } catch(e) { return []; }
+  }
+  return [];
+}
+
+function saveClaimedReward(title, points) {
+  const claimed = loadClaimedRewards();
+  claimed.unshift({
+    id: 'cr_' + Math.random().toString(36).slice(2, 8),
+    title,
+    points,
+    claimedAt: new Date().toISOString()
+  });
+  localStorage.setItem(CLAIMED_REWARDS_KEY, JSON.stringify(claimed));
+}
+
+function renderClaimedRewards() {
+  const container = document.getElementById('claimed-rewards-list');
+  if (!container) return;
+  
+  const claimed = loadClaimedRewards();
+  
+  if (claimed.length === 0) {
+    container.innerHTML = `
+      <div class="text-muted text-center py-3">
+        <i class="bi bi-trophy fs-1 opacity-50"></i>
+        <p class="mb-0 mt-2">No rewards claimed yet. Complete goals to see them here!</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = claimed.map(r => `
+    <div class="d-flex justify-content-between align-items-center p-2 mb-2 rounded" style="background: rgba(102, 126, 234, 0.1);">
+      <div>
+        <strong>${escapeHtml(r.title)}</strong>
+        <div class="small text-muted">${new Date(r.claimedAt).toLocaleDateString()}</div>
+      </div>
+      <span class="badge" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">${r.points} pts</span>
+    </div>
+  `).join('');
+}
+
+function updateRewardsStats() {
+  const claimed = loadClaimedRewards();
+  const statRedeemed = document.getElementById('stat-redeemed');
+  const statGoalsClaimed = document.getElementById('stat-goals-claimed');
+  const statTotalEarned = document.getElementById('stat-total-earned');
+  
+  // Count redeemed tasks
+  let redeemedCount = 0;
+  boards.forEach(b => {
+    (b.cards || []).forEach(c => {
+      if (c.redeemed) redeemedCount++;
+    });
+  });
+  
+  // Calculate total earned (current points + spent on goals)
+  const totalSpentOnGoals = claimed.reduce((sum, r) => sum + (r.points || 0), 0);
+  const totalEarned = rewards.points + totalSpentOnGoals;
+  
+  if (statRedeemed) statRedeemed.textContent = redeemedCount;
+  if (statGoalsClaimed) statGoalsClaimed.textContent = claimed.length;
+  if (statTotalEarned) statTotalEarned.textContent = totalEarned;
+}
+
 function claimGoal(id) {
   const g = rewards.goals.find((x) => x.id === id);
   if (!g) return;
   if (rewards.points >= g.target) {
+    // Save to claimed rewards history
+    saveClaimedReward(g.title, g.target);
     // deduct points and remove goal
     rewards.points = Math.round(rewards.points - g.target);
     rewards.goals = rewards.goals.filter((x) => x.id !== id);
     saveRewards();
     updateRewardsUI();
+    renderClaimedRewards();
+    updateRewardsStats();
     fireConfetti();
-    alert("Goal claimed: " + g.title + " — " + g.target + " points spent.");
+    alert("🎉 Goal claimed: " + g.title + " — " + g.target + " points spent!");
   } else {
     alert("Not enough points to claim this goal.");
   }
@@ -559,7 +652,7 @@ function updateBadgesUI() {
 }
 
 function updatePointsDisplay() {
-  const pointsElements = document.querySelectorAll('#nav-points-value, #points-badge, #rewards-points, #account-points');
+  const pointsElements = document.querySelectorAll('#nav-points, #nav-points-value, #points-badge, #rewards-points, #account-points');
   pointsElements.forEach(el => {
     if (el) el.textContent = rewards.points || 0;
   });
@@ -611,39 +704,74 @@ function incrementTaskCompletion() {
 }
 
 // Sorting functions
-function sortTasksByPriority(board, column) {
-  const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
-  if (!board.cards) return;
+function sortTasksByPriority(column) {
+  if (!currentBoard || !currentBoard.cards) return;
+  const board = currentBoard;
+  
+  const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3, '': 4 };
   
   const columnCards = board.cards.filter(c => c.column === column);
   const otherCards = board.cards.filter(c => c.column !== column);
   
   columnCards.sort((a, b) => {
-    const priorityA = priorityOrder[a.priority || 'medium'];
-    const priorityB = priorityOrder[b.priority || 'medium'];
+    const priorityA = priorityOrder[a.priority] !== undefined ? priorityOrder[a.priority] : 4;
+    const priorityB = priorityOrder[b.priority] !== undefined ? priorityOrder[b.priority] : 4;
     return priorityA - priorityB;
   });
   
-  board.cards = [...columnCards, ...otherCards];
+  board.cards = [...otherCards, ...columnCards];
+  board.updatedAt = Date.now();
+  
+  // Update the board in the global boards array
+  const idx = boards.findIndex(b => b.id === board.id);
+  if (idx !== -1) boards[idx] = board;
+  
   save();
   renderBoardColumns(board);
+  // Update button states after a microtask to ensure DOM is ready
+  setTimeout(() => updateSortButtonStates(column, 'priority'), 0);
 }
 
-function sortTasksByDate(board, column) {
-  if (!board.cards) return;
+function sortTasksByDate(column) {
+  if (!currentBoard || !currentBoard.cards) return;
+  const board = currentBoard;
   
   const columnCards = board.cards.filter(c => c.column === column);
   const otherCards = board.cards.filter(c => c.column !== column);
   
   columnCards.sort((a, b) => {
+    if (!a.dueDate && !b.dueDate) return 0;
     if (!a.dueDate) return 1;
     if (!b.dueDate) return -1;
     return new Date(a.dueDate) - new Date(b.dueDate);
   });
   
-  board.cards = [...columnCards, ...otherCards];
+  board.cards = [...otherCards, ...columnCards];
+  board.updatedAt = Date.now();
+  
+  // Update the board in the global boards array
+  const idx = boards.findIndex(b => b.id === board.id);
+  if (idx !== -1) boards[idx] = board;
+  
   save();
   renderBoardColumns(board);
+  // Update button states after a microtask to ensure DOM is ready
+  setTimeout(() => updateSortButtonStates(column, 'date'), 0);
+}
+
+// Update sort button visual states
+function updateSortButtonStates(column, activeSort) {
+  // Reset all buttons in this column
+  $all(`.sort-btn[data-col="${column}"]`).forEach(btn => {
+    btn.classList.remove('btn-primary', 'active');
+    btn.classList.add('btn-outline-secondary');
+  });
+  // Highlight the active one
+  const activeBtn = document.querySelector(`.sort-btn[data-col="${column}"][data-sort="${activeSort}"]`);
+  if (activeBtn) {
+    activeBtn.classList.remove('btn-outline-secondary');
+    activeBtn.classList.add('btn-primary', 'active');
+  }
 }
 
 function save() {
@@ -657,6 +785,57 @@ function id() {
 function formatDate(ts) {
   const d = new Date(ts);
   return d.toLocaleString();
+}
+
+// Parse flexible time input (e.g., "1400", "800", "9:00", "2:30", "14:00") and AM/PM to 24hr format
+function parseTimeInput(timeStr, ampm) {
+  if (!timeStr || !timeStr.trim()) return null;
+  let cleaned = timeStr.trim().replace(/[^0-9:]/g, '');
+  if (!cleaned) return null;
+  
+  let hours, minutes;
+  
+  if (cleaned.includes(':')) {
+    // Format like "9:00" or "14:30"
+    const parts = cleaned.split(':');
+    hours = parseInt(parts[0], 10);
+    minutes = parseInt(parts[1], 10) || 0;
+  } else if (cleaned.length <= 2) {
+    // Format like "9" or "14" (just hours)
+    hours = parseInt(cleaned, 10);
+    minutes = 0;
+  } else if (cleaned.length === 3) {
+    // Format like "800" or "930"
+    hours = parseInt(cleaned.slice(0, 1), 10);
+    minutes = parseInt(cleaned.slice(1), 10);
+  } else if (cleaned.length >= 4) {
+    // Format like "1400" or "0900"
+    hours = parseInt(cleaned.slice(0, 2), 10);
+    minutes = parseInt(cleaned.slice(2, 4), 10);
+  }
+  
+  if (isNaN(hours) || hours < 0 || hours > 23) return null;
+  if (isNaN(minutes) || minutes < 0 || minutes > 59) return null;
+  
+  // If hours > 12, it's already 24hr format, ignore AM/PM
+  if (hours <= 12 && ampm) {
+    if (ampm === 'PM' && hours !== 12) {
+      hours += 12;
+    } else if (ampm === 'AM' && hours === 12) {
+      hours = 0;
+    }
+  }
+  
+  return String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0');
+}
+
+// Convert 24hr time to 12hr format with AM/PM
+function to12HourFormat(hours24) {
+  const h = parseInt(hours24, 10);
+  if (h === 0) return { time: '12:00', ampm: 'AM' };
+  if (h === 12) return { time: '12:00', ampm: 'PM' };
+  if (h > 12) return { time: (h - 12) + ':' + String(parseInt(hours24.split(':')[1] || 0, 10)).padStart(2, '0'), ampm: 'PM' };
+  return { time: h + ':' + String(parseInt(hours24.split(':')[1] || 0, 10)).padStart(2, '0'), ampm: 'AM' };
 }
 
 function render() {
@@ -673,7 +852,7 @@ function render() {
     a.href = `board.html?board=${b.id}`;
     a.style.minHeight = '120px';
     a.style.position = 'relative';
-    a.style.overflow = 'hidden';
+    a.style.overflow = 'visible';
 
     // Add color indicator bar on left side if board has a background
     if (b.background) {
@@ -712,42 +891,95 @@ function render() {
     const meta = document.createElement('div');
     meta.className = 'board-meta mb-2';
     meta.textContent = `Updated ${formatDate(b.updatedAt)}`;
-    const actions = document.createElement('div');
-    actions.className = 'd-flex gap-2';
-    const open = document.createElement('button');
-    open.className = 'btn btn-sm btn-outline-primary';
-    open.textContent = 'Open';
-    open.addEventListener('click', (e)=>{ e.preventDefault(); window.location.href = `board.html?board=${b.id}`; });
-    const del = document.createElement('button');
-    del.className = 'btn btn-sm btn-outline-danger';
-    del.textContent = 'Delete';
-    del.addEventListener('click', (e)=>{
-      e.preventDefault(); if (!confirm('Delete board "'+b.name+'"?')) return; boards = boards.filter(x=>x.id!==b.id); save(); render();
+    
+    // 3-dot dropdown menu
+    const dropdown = document.createElement('div');
+    dropdown.className = 'dropdown position-absolute';
+    dropdown.style.top = '8px';
+    dropdown.style.right = '8px';
+    dropdown.style.zIndex = '10';
+    
+    const dropdownBtn = document.createElement('button');
+    dropdownBtn.className = 'btn btn-sm btn-light border-0';
+    dropdownBtn.type = 'button';
+    dropdownBtn.setAttribute('data-bs-toggle', 'dropdown');
+    dropdownBtn.setAttribute('data-bs-auto-close', 'true');
+    dropdownBtn.setAttribute('aria-expanded', 'false');
+    dropdownBtn.innerHTML = '<i class="bi bi-three-dots-vertical"></i>';
+    dropdownBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); });
+    
+    const dropdownMenu = document.createElement('ul');
+    dropdownMenu.className = 'dropdown-menu dropdown-menu-end shadow';
+    dropdownMenu.addEventListener('click', (e) => { e.stopPropagation(); });
+    
+    // Open option
+    const openLi = document.createElement('li');
+    const openLink = document.createElement('a');
+    openLink.className = 'dropdown-item';
+    openLink.href = '#';
+    openLink.innerHTML = '<i class="bi bi-folder2-open me-2"></i>Open';
+    openLink.addEventListener('click', (e) => { 
+      e.preventDefault(); 
+      e.stopPropagation();
+      window.location.href = `board.html?board=${b.id}`; 
     });
-    actions.appendChild(open);
-    actions.appendChild(del);
+    openLi.appendChild(openLink);
+    
+    // Edit/Rename option
+    const editLi = document.createElement('li');
+    const editLink = document.createElement('a');
+    editLink.className = 'dropdown-item';
+    editLink.href = '#';
+    editLink.innerHTML = '<i class="bi bi-pencil me-2"></i>Rename';
+    editLink.addEventListener('click', (e) => { 
+      e.preventDefault(); 
+      e.stopPropagation();
+      const newName = prompt('Enter new name for board:', b.name);
+      if (newName && newName.trim()) {
+        b.name = newName.trim();
+        b.updatedAt = Date.now();
+        save();
+        render();
+      }
+    });
+    editLi.appendChild(editLink);
+    
+    // Divider
+    const dividerLi = document.createElement('li');
+    dividerLi.innerHTML = '<hr class="dropdown-divider">';
+    
+    // Delete option
+    const deleteLi = document.createElement('li');
+    const deleteLink = document.createElement('a');
+    deleteLink.className = 'dropdown-item text-danger';
+    deleteLink.href = '#';
+    deleteLink.innerHTML = '<i class="bi bi-trash me-2"></i>Delete';
+    deleteLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!confirm('Delete board "'+b.name+'"?')) return; 
+      boards = boards.filter(x=>x.id!==b.id); 
+      save(); 
+      render();
+    });
+    deleteLi.appendChild(deleteLink);
+    
+    dropdownMenu.appendChild(openLi);
+    dropdownMenu.appendChild(editLi);
+    dropdownMenu.appendChild(dividerLi);
+    dropdownMenu.appendChild(deleteLi);
+    dropdown.appendChild(dropdownBtn);
+    dropdown.appendChild(dropdownMenu);
 
     body.appendChild(title);
     body.appendChild(stats);
     body.appendChild(meta);
-    body.appendChild(actions);
+    a.appendChild(dropdown);
     a.appendChild(body);
     gallery.appendChild(a);
   });
-
-  // Add a final card that opens the "Create new board" modal
-  const createCard = document.createElement('div');
-  createCard.className = 'card text-center border-dashed';
-  createCard.style.minHeight = '120px';
-  createCard.style.display = 'flex';
-  createCard.style.alignItems = 'center';
-  createCard.style.justifyContent = 'center';
-  createCard.innerHTML = `
-    <div class="card-body">
-      <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#newBoardModal">+ Create board</button>
-    </div>
-  `;
-  gallery.appendChild(createCard);
+  
+  // Note: Create board button is now in the HTML below the gallery
 }
 
 function setupForm() {
@@ -880,6 +1112,7 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Initialize home page features (calendar, achievements, streak, quotes)
   if (document.body.id === 'page-home') {
+    renderHomeBoardsGallery();
     renderCalendar();
     setupCalendarNav();
     renderAchievements();
@@ -946,7 +1179,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         let html = '<div class="horizontal-gallery d-flex overflow-auto pb-2">';
         upcoming.forEach(t => {
-          const urg = getUrgency(t.dueDate);
+          const urg = getUrgency(t.dueDate, t);
           const urgClass = urg.class ? urg.class : '';
           const urgLabel = urg.label ? escapeHtml(urg.label) : '';
           html += `
@@ -1037,6 +1270,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (document.body.id === "page-rewards") {
     loadRewards();
     updateRewardsUI();
+    renderClaimedRewards();
 
     const earnBtn = document.getElementById("earn-points");
     if (earnBtn) earnBtn.addEventListener("click", () => earnPoints(10));
@@ -1136,6 +1370,10 @@ function initBoardDetail(boardId) {
         '<div class="alert alert-warning">Board not found.</div>';
     return;
   }
+  
+  // Set the global currentBoard reference
+  currentBoard = board;
+  
   // set title and background
   const titleEl = document.getElementById("board-title");
   if (titleEl) titleEl.textContent = board.name;
@@ -1147,17 +1385,30 @@ function initBoardDetail(boardId) {
 
   renderBoardColumns(board);
   setupBoardInteractions(board);
+  
+  // Check if we should open a specific task modal (from calendar click)
+  const params = new URLSearchParams(window.location.search);
+  const taskId = params.get("task");
+  if (taskId) {
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+      openTaskModal(board, taskId);
+    }, 100);
+  }
 }
 
 // Urgency helper: returns urgency level based on due date
-function getUrgency(dueDate){
+// If card is provided and is done, no urgency is shown
+function getUrgency(dueDate, card = null){
   if (!dueDate) return { level: 'none', label: '', class: '' };
+  // If task is done, don't show urgency
+  if (card && card.column === 'done') return { level: 'none', label: '', class: '' };
+  
   const now = Date.now();
   const due = new Date(dueDate).getTime();
   const hoursLeft = (due - now) / (1000 * 60 * 60);
   if (hoursLeft < 0) return { level: 'overdue', label: 'Overdue', class: 'urgency-overdue' };
-  if (hoursLeft < 24) return { level: 'urgent', label: 'Due Today', class: 'urgency-urgent' };
-  if (hoursLeft < 72) return { level: 'soon', label: 'Due Soon', class: 'urgency-soon' };
+  if (hoursLeft < 24) return { level: 'soon', label: 'Due Soon', class: 'urgency-soon' };
   return { level: 'normal', label: '', class: '' };
 }
 
@@ -1184,14 +1435,19 @@ function renderBoardColumns(board){
     if (!list) return;
     list.innerHTML = '';
     const items = sortCards((board.cards||[]).filter(c=>c.column===col));
+    
+    // Update the count badge for this column
+    const countEl = document.getElementById(col + '-count');
+    if (countEl) countEl.textContent = items.length;
+    
     items.forEach(card => {
       const el = document.createElement('div');
       el.className = 'card-item';
       el.draggable = true;
       el.dataset.cardId = card.id;
 
-      // Urgency indicator
-      const urgency = getUrgency(card.dueDate);
+      // Urgency indicator (pass card to check if done)
+      const urgency = getUrgency(card.dueDate, card);
       if (urgency.class) el.classList.add(urgency.class);
 
       // Point weight badge (top-left)
@@ -1216,7 +1472,7 @@ function renderBoardColumns(board){
       // If the card is in the done column, show a redeem button (if not redeemed)
       if (col === 'done'){
         const btnWrap = document.createElement('div');
-        btnWrap.className = 'mt-2';
+        btnWrap.className = 'mt-2 d-flex justify-content-between align-items-center';
         const btn = document.createElement('button');
         btn.className = 'btn btn-sm btn-success';
         const REWARD_PER_TASK = card.points || 10; // points per redeemed completed task (configurable per card)
@@ -1257,7 +1513,7 @@ function renderBoardColumns(board){
         btnWrap.appendChild(btn);
         // add a remove button next to redeem so users can delete completed tasks
         const removeBtn = document.createElement('button');
-        removeBtn.className = 'btn btn-sm btn-outline-danger ms-2 remove-card';
+        removeBtn.className = 'btn btn-sm btn-danger remove-card';
         removeBtn.textContent = 'Remove';
         removeBtn.addEventListener('click', (e)=>{
           e.preventDefault(); e.stopPropagation();
@@ -1281,7 +1537,7 @@ function renderBoardColumns(board){
         const ctrlWrap = document.createElement('div');
         ctrlWrap.className = 'mt-2 d-flex justify-content-end';
         const rm = document.createElement('button');
-        rm.className = 'btn btn-sm btn-outline-danger remove-card';
+        rm.className = 'btn btn-sm btn-danger remove-card';
         rm.textContent = 'Remove';
         rm.addEventListener('click', (e)=>{
           e.preventDefault(); e.stopPropagation();
@@ -1311,7 +1567,9 @@ function setupBoardInteractions(board){
         document.getElementById('new-task-title').value = '';
         document.getElementById('new-task-desc').value = '';
         document.getElementById('new-task-column').value = 'todo';
-        document.getElementById('new-task-duedate').value = '';
+        document.getElementById('new-task-date').value = '';
+        document.getElementById('new-task-time').value = '';
+        document.getElementById('new-task-ampm').value = 'AM';
         document.getElementById('new-task-priority').value = '';
         document.getElementById('new-task-points').value = '10';
       });
@@ -1322,12 +1580,18 @@ function setupBoardInteractions(board){
       const column = document.getElementById('new-task-column').value;
       const title = document.getElementById('new-task-title').value.trim();
       const description = document.getElementById('new-task-desc').value.trim();
-      const dueVal = document.getElementById('new-task-duedate').value;
+      const dateVal = document.getElementById('new-task-date').value;
+      const timeVal = document.getElementById('new-task-time').value;
+      const ampmVal = document.getElementById('new-task-ampm').value;
       const priority = document.getElementById('new-task-priority').value;
       const points = parseInt(document.getElementById('new-task-points').value, 10) || 10;
       if (!title) return;
       const card = { id: 'c_'+Math.random().toString(36).slice(2,9), title, description, column, priority, points };
-      if (dueVal) card.dueDate = new Date(dueVal).toISOString();
+      if (dateVal) {
+        const parsedTime = parseTimeInput(timeVal, ampmVal);
+        const dueDateTime = parsedTime ? `${dateVal}T${parsedTime}` : `${dateVal}T23:59`;
+        card.dueDate = new Date(dueDateTime).toISOString();
+      }
       board.cards = board.cards || [];
       board.cards.push(card);
       board.updatedAt = Date.now();
@@ -1355,6 +1619,25 @@ function setupBoardInteractions(board){
       moveCardToColumn(board, cardId, colEl.dataset.col);
     });
   });
+
+  // Wire sort buttons using event delegation on the board root
+  const boardRoot = document.getElementById('board-root');
+  if (boardRoot && !boardRoot.dataset.sortWired) {
+    boardRoot.dataset.sortWired = 'true';
+    boardRoot.addEventListener('click', (e) => {
+      const btn = e.target.closest('.sort-btn');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const col = btn.dataset.col;
+      const sortType = btn.dataset.sort;
+      if (sortType === 'priority') {
+        sortTasksByPriority(col);
+      } else if (sortType === 'date') {
+        sortTasksByDate(col);
+      }
+    });
+  }
 }
 
 function onDragStart(ev) {
@@ -1412,6 +1695,82 @@ function setupTutorialNavigation() {
   const progressBadge = document.getElementById("tutorial-progress");
   const totalSteps = 4;
 
+  function updateStep() {
+    // Hide all steps
+    for (let i = 1; i <= totalSteps; i++) {
+      const step = document.getElementById(`tutorial-step-${i}`);
+      if (step) step.classList.add('d-none');
+    }
+    // Show current step
+    const currentStep = document.getElementById(`tutorial-step-${currentTutorialStep}`);
+    if (currentStep) currentStep.classList.remove('d-none');
+    
+    // Update progress
+    if (progressBadge) progressBadge.textContent = `${currentTutorialStep} of ${totalSteps}`;
+    
+    // Show/hide buttons
+    if (prevBtn) prevBtn.style.display = currentTutorialStep > 1 ? '' : 'none';
+    if (nextBtn) nextBtn.style.display = currentTutorialStep < totalSteps ? '' : 'none';
+    if (finishBtn) finishBtn.style.display = currentTutorialStep === totalSteps ? '' : 'none';
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      if (currentTutorialStep < totalSteps) {
+        currentTutorialStep++;
+        updateStep();
+      }
+    });
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (currentTutorialStep > 1) {
+        currentTutorialStep--;
+        updateStep();
+      }
+    });
+  }
+
+  if (skipBtn) {
+    skipBtn.addEventListener('click', () => {
+      localStorage.setItem(TUTORIAL_COMPLETED, 'true');
+      const modal = bootstrap.Modal.getInstance(document.getElementById('tutorialModal'));
+      if (modal) modal.hide();
+    });
+  }
+
+  if (finishBtn) {
+    finishBtn.addEventListener('click', () => {
+      localStorage.setItem(TUTORIAL_COMPLETED, 'true');
+      const modal = bootstrap.Modal.getInstance(document.getElementById('tutorialModal'));
+      if (modal) modal.hide();
+    });
+  }
+
+  updateStep();
+}
+
+// Reset tutorial - called from account page
+function resetTutorial() {
+  localStorage.removeItem(TUTORIAL_COMPLETED);
+  currentTutorialStep = 1;
+  alert('Tutorial reset! Visit the home page to see the tutorial again.');
+}
+
+// Show tutorial - called from navbar button
+function showTutorial() {
+  const tutorialModal = document.getElementById('tutorialModal');
+  if (!tutorialModal) {
+    alert('Tutorial is only available on the home page.');
+    return;
+  }
+  currentTutorialStep = 1;
+  setupTutorialNavigation();
+  const modal = new bootstrap.Modal(tutorialModal);
+  modal.show();
+}
+
 // --- Task details / edit / delete modal handlers ---
 function findCard(board, cardId){ return (board.cards||[]).find(c=>c.id===cardId); }
 
@@ -1457,7 +1816,9 @@ function openTaskModal(board, cardId){
   const editForm = document.getElementById('task-edit-form');
   const titleInput = document.getElementById('task-edit-title');
   const descInput = document.getElementById('task-edit-desc');
-  const dueInput = document.getElementById('task-edit-duedate');
+  const dateInput = document.getElementById('task-edit-date');
+  const timeInput = document.getElementById('task-edit-time');
+  const ampmInput = document.getElementById('task-edit-ampm');
   const priorityInput = document.getElementById('task-edit-priority');
   const pointsInput = document.getElementById('task-edit-points');
 
@@ -1472,7 +1833,21 @@ function openTaskModal(board, cardId){
   // fill inputs for edit
   titleInput.value = card.title || '';
   descInput.value = card.description || '';
-  dueInput.value = card.dueDate ? new Date(card.dueDate).toISOString().slice(0,16) : '';
+  if (card.dueDate) {
+    const d = new Date(card.dueDate);
+    dateInput.value = d.toISOString().slice(0,10);
+    // Convert to 12-hour format for display
+    const hours = d.getHours();
+    const mins = d.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const displayHours = hours === 0 ? 12 : (hours > 12 ? hours - 12 : hours);
+    timeInput.value = displayHours + ':' + String(mins).padStart(2, '0');
+    ampmInput.value = ampm;
+  } else {
+    dateInput.value = '';
+    timeInput.value = '';
+    ampmInput.value = 'AM';
+  }
   if (priorityInput) priorityInput.value = card.priority || '';
   if (pointsInput) pointsInput.value = card.points || 10;
 
@@ -1504,7 +1879,13 @@ function openTaskModal(board, cardId){
     if (!c) return;
     c.title = titleInput.value.trim() || c.title;
     c.description = descInput.value.trim() || '';
-    c.dueDate = dueInput.value ? new Date(dueInput.value).toISOString() : null;
+    if (dateInput.value) {
+      const parsedTime = parseTimeInput(timeInput.value, ampmInput.value);
+      const dueDateTime = parsedTime ? `${dateInput.value}T${parsedTime}` : `${dateInput.value}T23:59`;
+      c.dueDate = new Date(dueDateTime).toISOString();
+    } else {
+      c.dueDate = null;
+    }
     c.priority = priorityInput ? priorityInput.value : c.priority;
     c.points = pointsInput ? parseInt(pointsInput.value, 10) || 10 : c.points;
     b.updatedAt = Date.now();

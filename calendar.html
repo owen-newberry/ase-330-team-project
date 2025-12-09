@@ -7,64 +7,6 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link href="assets/css/style.css" rel="stylesheet">
-  <style>
-    .calendar-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.5rem;
-    }
-    .calendar-day {
-      aspect-ratio: 1;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 0.5rem;
-      background: white;
-      min-height: 100px;
-      display: flex;
-      flex-direction: column;
-    }
-    .calendar-day-header {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-    .calendar-day.today {
-      border-color: #0d6efd;
-      background: #e7f1ff;
-    }
-    .calendar-day.other-month {
-      opacity: 0.4;
-    }
-    .calendar-task {
-      font-size: 0.7rem;
-      padding: 2px 4px;
-      border-radius: 3px;
-      margin-bottom: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      cursor: pointer;
-      transition: transform 0.1s, box-shadow 0.1s;
-    }
-    .calendar-task:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    .calendar-task.priority-urgent { background: #f8d7da; border-left: 3px solid #dc3545; }
-    .calendar-task.priority-high { background: #ffe5d0; border-left: 3px solid #fd7e14; }
-    .calendar-task.priority-medium { background: #fff3cd; border-left: 3px solid #ffc107; }
-    .calendar-task.priority-low { background: #d4edda; border-left: 3px solid #28a745; }
-    .calendar-header {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-    .calendar-header-day {
-      text-align: center;
-      font-weight: 600;
-      padding: 0.5rem;
-    }
-  </style>
 </head>
 <body id="page-calendar">
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -78,18 +20,18 @@
         <a href="account.html"
           class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex justify-content-center align-items-center"
           title="Account" style="width:38px;height:38px;padding:0;background:#fff">
-          <img src="https://via.placeholder.com/32" alt="avatar" class="rounded-circle"
+          <img src="assets/images/placeholder-avatar.webp" alt="avatar" class="rounded-circle"
             style="width:32px;height:32px;">
         </a>
       </div>
 
       <a class="navbar-brand fw-bold ms-3 me-3" href="index.html">Quest Log</a>
 
-      <div class="d-flex align-items-center me-3">
-        <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 0.9rem;" title="Your total points">
-          <i class="bi bi-star-fill"></i> <span id="nav-points-value">0</span> pts
+      <a href="rewards.html" class="d-flex align-items-center me-3 text-decoration-none">
+        <span class="badge px-3 py-2" style="font-size: 0.9rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" title="Your total points - Click to redeem">
+          <i class="bi bi-star-fill text-warning"></i> <span id="nav-points-value" class="text-white">0</span> <span class="text-white">pts</span>
         </span>
-      </div>
+      </a>
 
       <form class="d-none d-md-flex ms-3 me-3" role="search">
         <input id="nav-search" class="form-control form-control-sm" type="search"
@@ -244,8 +186,8 @@
           taskEl.title = `${task.title} (${task.boardName}) - Click to open board`;
           taskEl.style.cursor = 'pointer';
           taskEl.addEventListener('click', () => {
-            // Navigate to the board containing this task
-            window.location.href = `board.html?id=${task.boardId}`;
+            // Navigate to the board containing this task and open task detail
+            window.location.href = `board.html?board=${task.boardId}&task=${task.id}`;
           });
           dayEl.appendChild(taskEl);
         });

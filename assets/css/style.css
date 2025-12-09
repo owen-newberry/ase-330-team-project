@@ -37,8 +37,8 @@ body{
 }
 
 .boards-row { display:flex; gap:1rem; align-items:flex-start; }
-.board-column { flex:1; min-height:320px; max-height:80vh; overflow:auto; }
-.board-list { min-height: 50px; }
+.board-column { flex:1; min-height:300px; }
+.board-list { min-height: 200px; }
 .card-item {
   background: var(--card-bg);
   border-radius:8px;
@@ -115,7 +115,7 @@ body{
 
 /* Board detail specific */
 .board-columns { display:flex; gap:1rem; align-items:flex-start; }
-.board-column { flex:1; min-width:240px; max-height:70vh; overflow:auto; }
+.board-column { flex:1; min-width:240px; }
 .board-column .board-list { min-height:20px; }
 .board-column .card-item { margin-bottom:0.6rem; background:#fff; padding:0.6rem; border-radius:6px; cursor:grab; position:relative; }
 .board-column .card-item.dragging { opacity:0.5; }
@@ -129,11 +129,11 @@ body{
 .urgency-urgent .urgency-label { color: #fd7e14; }
 .urgency-soon .urgency-label { color: #b8860b; }
 
-/* Point badge (top-left) */
+/* Point badge (top-right) */
 .point-badge {
   position: absolute;
   top: -6px;
-  left: -6px;
+  right: -6px;
   background: linear-gradient(135deg, #6f42c1, #8b5e3c);
   color: #fff;
   font-size: 0.65rem;
@@ -216,35 +216,67 @@ body{
 }
 
 /* Calendar view */
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.calendar-header-day {
+  text-align: center;
+  font-weight: 600;
+  padding: 0.5rem;
+  background: var(--bg-spot);
+  border-radius: 4px;
+}
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 0.5rem;
 }
 .calendar-day {
-  min-height: 80px;
-  background: var(--card-bg);
-  border: 1px solid rgba(0,0,0,0.06);
-  padding: 4px;
+  min-height: 100px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 0.5rem;
   font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
 }
-.calendar-day.today { background: rgba(13,110,253,0.1); border-color: #0d6efd; }
-.calendar-day .day-number { font-weight: 600; margin-bottom: 4px; }
+.calendar-day.today {
+  background: #e7f1ff;
+  border-color: #0d6efd;
+}
+.calendar-day.other-month {
+  opacity: 0.4;
+}
+.calendar-day .day-number {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
 .calendar-task {
-  background: var(--accent);
-  color: #fff;
+  font-size: 0.7rem;
   padding: 2px 4px;
   border-radius: 3px;
-  font-size: 0.65rem;
   margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+.calendar-task:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.calendar-task.priority-urgent { background: #f8d7da; color: #721c24; border-left: 3px solid #dc3545; }
+.calendar-task.priority-high { background: #ffe5d0; color: #7c4a03; border-left: 3px solid #fd7e14; }
+.calendar-task.priority-medium { background: #fff3cd; color: #856404; border-left: 3px solid #ffc107; }
+.calendar-task.priority-low { background: #d4edda; color: #155724; border-left: 3px solid #28a745; }
 .calendar-task-time {
   font-weight: 700;
   opacity: 0.9;

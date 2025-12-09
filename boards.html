@@ -17,17 +17,17 @@
 
       <div class="d-flex align-items-center">
         <a href="account.html" class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex justify-content-center align-items-center" title="Account" style="width:38px;height:38px;padding:0;background:#fff">
-          <img src="https://via.placeholder.com/32" alt="avatar" class="rounded-circle" style="width:32px;height:32px;">
+          <img src="assets/images/placeholder-avatar.webp" alt="avatar" class="rounded-circle" style="width:32px;height:32px;">
         </a>
       </div>
 
       <a class="navbar-brand fw-bold ms-3 me-3" href="index.html">Quest Log</a>
 
-      <div class="d-flex align-items-center me-3">
-        <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 0.9rem;" title="Your total points">
-          <i class="bi bi-star-fill"></i> <span id="nav-points-value">0</span> pts
+      <a href="rewards.html" class="d-flex align-items-center me-3 text-decoration-none">
+        <span class="badge px-3 py-2" style="font-size: 0.9rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" title="Your total points - Click to redeem">
+          <i class="bi bi-star-fill text-warning"></i> <span id="nav-points-value" class="text-white">0</span> <span class="text-white">pts</span>
         </span>
-      </div>
+      </a>
 
       <form class="d-none d-md-flex ms-3 me-3" role="search">
         <input id="nav-search" class="form-control form-control-sm" type="search" placeholder="Search tasks, boards..." aria-label="Search">
@@ -46,12 +46,12 @@
   <main class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h1 class="h3 mb-0">Boards</h1>
-      <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#newBoardModal">+ New board</button>
-      </div>
     </div>
 
-    <p class="text-muted small mb-3">Boards are project-specific workspaces made of lists and cards. Use a board to organize tasks for a project — click a board to open it, or create a new one to get started.</p>
+    <div class="d-flex gap-2 align-items-center justify-content-between mb-3">
+      <p class="text-muted small mb-0">Boards are project-specific workspaces made of lists and cards. Use a board to organize tasks for a project — click a board to open it, or create a new one to get started.</p>
+      <button class="btn btn-sm btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#newBoardModal">+ Add Board</button>
+    </div>
 
     <div class="card">
       <div class="card-body">
@@ -75,57 +75,10 @@
                 <label class="form-label">Board name</label>
                 <input id="board-name" class="form-control" required>
               </div>
-
-                <div class="mb-3">
-                  <label class="form-label">Background preview</label>
-                  <div id="bg-preview-large" class="mb-2" style="border-radius:8px;overflow:hidden;height:140px;background:#0d6efd"></div>
-
-                  <label class="form-label">Background options</label>
-                  <div class="d-flex gap-2 flex-wrap" id="bg-choices">
-                    <label class="bg-choice btn p-0">
-                      <input type="radio" name="board-bg" value="#0d6efd" checked>
-                      <span class="bg-preview" style="background:#0d6efd"></span>
-                    </label>
-                    <label class="bg-choice btn p-0">
-                      <input type="radio" name="board-bg" value="#6f42c1">
-                      <span class="bg-preview" style="background:#6f42c1"></span>
-                    </label>
-                    <label class="bg-choice btn p-0">
-                      <input type="radio" name="board-bg" value="#198754">
-                      <span class="bg-preview" style="background:#198754"></span>
-                    </label>
-                    <label class="bg-choice btn p-0">
-                      <input type="radio" name="board-bg" value="#dc3545">
-                      <span class="bg-preview" style="background:#dc3545"></span>
-                    </label>
-                    <label class="bg-choice btn p-0">
-                      <input type="radio" name="board-bg" value="#fd7e14">
-                      <span class="bg-preview" style="background:#fd7e14"></span>
-                    </label>
-                    <label class="bg-choice btn p-0">
-                      <input type="radio" name="board-bg" value="#20c997">
-                      <span class="bg-preview" style="background:#20c997"></span>
-                    </label>
-                    <label class="bg-choice btn p-0">
-                      <input type="radio" name="board-bg" value="linear-gradient(135deg,#667eea 0%,#764ba2 100%)">
-                      <span class="bg-preview" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)"></span>
-                    </label>
-                    <label class="bg-choice btn p-0">
-                      <input type="radio" name="board-bg" value="linear-gradient(135deg,#f6d365 0%,#fda085 100%)">
-                      <span class="bg-preview" style="background:linear-gradient(135deg,#f6d365 0%,#fda085 100%)"></span>
-                    </label>
-                  </div>
-                  <div class="form-text">Pick a color or gradient for the board (preview above).</div>
-                </div>
             </div>
-            <div class="modal-footer d-flex justify-content-between align-items-center">
-              <div>
-                <button id="use-template-btn" type="button" class="btn btn-outline-secondary">Use template</button>
-              </div>
-              <div>
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-primary" type="submit">Create board</button>
-              </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button class="btn btn-primary" type="submit">Create board</button>
             </div>
           </form>
         </div>

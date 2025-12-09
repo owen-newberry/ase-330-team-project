@@ -35,7 +35,7 @@
             style="width: 38px; height: 38px; padding: 0; background: #fff"
           >
             <img
-              src="https://via.placeholder.com/32"
+              src="assets/images/placeholder-avatar.webp"
               alt="avatar"
               class="rounded-circle"
               style="width: 32px; height: 32px"
@@ -47,11 +47,11 @@
           >Quest Log</a
         >
 
-        <div class="d-flex align-items-center me-3">
-          <span class="badge bg-warning text-dark px-3 py-2" style="font-size: 0.9rem;" title="Your total points">
-            <i class="bi bi-star-fill"></i> <span id="nav-points-value">0</span> pts
+        <a href="rewards.html" class="d-flex align-items-center me-3 text-decoration-none">
+          <span class="badge px-3 py-2" style="font-size: 0.9rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" title="Your total points - Click to redeem">
+            <i class="bi bi-star-fill text-warning"></i> <span id="nav-points-value" class="text-white">0</span> <span class="text-white">pts</span>
           </span>
-        </div>
+        </a>
 
         <form class="d-none d-md-flex ms-3 me-3" role="search">
           <input
@@ -75,54 +75,32 @@
               <a class="nav-link" href="rewards.html">Rewards</a>
             </li>
           </ul>
+          <button class="btn btn-sm btn-outline-secondary" onclick="showTutorial()" title="Show Tutorial">
+            <i class="bi bi-question-circle"></i> Tutorial
+          </button>
         </div>
       </div>
     </nav>
 
     <main class="container my-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3">Home dashboard</h1>
-        <div>
-          <span class="me-2">Points: <strong id="points-badge">—</strong></span>
-          <a class="btn btn-sm btn-outline-primary" href="rewards.html"
-            >Redeem</a
-          >
-        </div>
+        <h1 class="h3">Home Dashboard</h1>
       </div>
 
       <div class="row g-3">
         <div class="col-lg-8">
           <div class="card mb-3">
             <div class="card-body">
-              <h5 class="card-title">All boards</h5>
-
-              <section class="mt-4">
-                <h5 class="mb-2">Boards</h5>
-                <div class="horizontal-gallery d-flex overflow-auto pb-2">
-                  <a
-                    href="boards.html"
-                    class="card card-item p-2 me-3 text-decoration-none text-dark"
-                    style="min-width: 200px; flex: 0 0 auto"
-                  >
-                    <div class="card-body">
-                      <h6 class="card-title">Product Board</h6>
-                      <p class="small text-muted mb-0">3 columns • 12 cards</p>
-                    </div>
-                  </a>
-                  <a
-                    href="boards.html"
-                    class="card card-item p-2 me-3 text-decoration-none text-dark"
-                    style="min-width: 200px; flex: 0 0 auto"
-                  >
-                    <div class="card-body">
-                      <h6 class="card-title">Marketing</h6>
-                      <p class="small text-muted mb-0">2 columns • 5 cards</p>
-                    </div>
-                  </a>
-                </div>
-              </section>
-
-              <hr class="my-4" />
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0">Boards</h5>
+                <a href="boards.html" class="btn btn-sm btn-primary">+ Add Board</a>
+              </div>
+              <div id="home-boards-gallery" class="horizontal-gallery d-flex overflow-auto pb-2">
+                <!-- Boards will be populated by JavaScript -->
+              </div>
+              <div id="no-boards-message" class="text-muted small" style="display: none;">
+                No boards yet. Create your first board to get started!
+              </div>
             </div>
           </div>
 
@@ -137,6 +115,32 @@
               </div>
             </div>
           </div>
+
+          <!-- Calendar View Section -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0">📅 Calendar View</h5>
+                <div>
+                  <button id="cal-prev" class="btn btn-sm btn-outline-secondary">◀</button>
+                  <span id="cal-month-label" class="mx-2 fw-semibold">December 2025</span>
+                  <button id="cal-next" class="btn btn-sm btn-outline-secondary">▶</button>
+                </div>
+              </div>
+              <div class="calendar-header">
+                <div class="calendar-header-day">Sun</div>
+                <div class="calendar-header-day">Mon</div>
+                <div class="calendar-header-day">Tue</div>
+                <div class="calendar-header-day">Wed</div>
+                <div class="calendar-header-day">Thu</div>
+                <div class="calendar-header-day">Fri</div>
+                <div class="calendar-header-day">Sat</div>
+              </div>
+              <div class="calendar-grid" id="calendar-grid">
+                <!-- Calendar rendered by JS -->
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="col-lg-4">
@@ -148,52 +152,45 @@
                   <h6 id="stat-todo">0</h6>
                   <small class="text-muted">To Do</small>
                 </div>
-                
-                <!-- Motivational streak and achievements -->
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">🔥 Your Streak</h5>
-                        <div class="text-center mb-3">
-                            <span class="streak-badge" id="streak-count">0 days</span>
-                        </div>
-                        <p class="small text-muted text-center mb-0">Complete tasks daily to build your streak!</p>
-                    </div>
+                <div class="col-4">
+                  <h6 id="stat-progress">0</h6>
+                  <small class="text-muted">In Progress</small>
                 </div>
-                
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">🏆 Achievements</h5>
-                        <div id="achievements-list" class="d-flex flex-wrap gap-2">
-                            <!-- Achievements rendered by JS -->
-                        </div>
-                    </div>
+                <div class="col-4">
+                  <h6 id="stat-done">0</h6>
+                  <small class="text-muted">Done</small>
                 </div>
-                
-                <!-- Motivational quote -->
-                <div class="card mb-3 bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <div class="card-body text-white text-center">
-                        <div class="fs-5 mb-2">💡</div>
-                        <p id="motivational-quote" class="mb-0 fst-italic">"The secret of getting ahead is getting started."</p>
-                        <small class="opacity-75">— Mark Twain</small>
-                    </div>
-                </div>
+              </div>
             </div>
-        </div>
-        
-        <!-- Calendar View Section -->
-        <div class="card mb-3">
+          </div>
+                
+          <!-- Motivational streak -->
+          <div class="card mb-3">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="card-title mb-0">📅 Calendar View</h5>
-                    <div>
-                        <button id="cal-prev" class="btn btn-sm btn-outline-secondary">◀</button>
-                        <span id="cal-month-label" class="mx-2 fw-semibold">December 2025</span>
-                        <button id="cal-next" class="btn btn-sm btn-outline-secondary">▶</button>
-                    </div>
-                </div>
-                <div class="calendar-grid" id="calendar-grid">
-                    <!-- Calendar rendered by JS -->
-                </div>
+              <h5 class="card-title">🔥 Your Streak</h5>
+              <div class="text-center mb-3">
+                <span class="streak-badge" id="streak-count">0 days</span>
+              </div>
+              <p class="small text-muted text-center mb-0">Complete tasks daily to build your streak!</p>
+            </div>
+          </div>
+          
+          <!-- Achievements -->
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">🏆 Achievements</h5>
+              <div id="achievements-list" class="d-flex flex-wrap gap-2">
+                <!-- Achievements rendered by JS -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Motivational quote -->
+          <div class="card mb-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-center" style="padding: 1.5rem;">
+              <div class="fs-4 mb-2">💡</div>
+              <p id="motivational-quote" class="mb-1 fst-italic" style="color: #fff; font-size: 1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">"The secret of getting ahead is getting started."</p>
+              <small style="color: rgba(255,255,255,0.9);">— Mark Twain</small>
             </div>
           </div>
         </div>
