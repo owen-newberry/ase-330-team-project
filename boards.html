@@ -37,8 +37,12 @@
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
           <li class="nav-item"><a class="nav-link" href="calendar.html">Calendar</a></li>
+          <li class="nav-item"><a class="nav-link" href="achievements.html">Achievements</a></li>
           <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
         </ul>
+        <button class="btn btn-sm btn-outline-secondary" onclick="showPageTutorial()" title="Show Help">
+          <i class="bi bi-question-circle"></i> Help
+        </button>
       </div>
     </div>
   </nav>
@@ -86,6 +90,37 @@
     </div>
 
   </main>
+
+  <!-- Page Tutorial Modal -->
+  <div class="modal fade" id="pageTutorialModal" tabindex="-1" aria-labelledby="pageTutorialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="pageTutorialModalLabel">📋 Boards Guide</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center mb-3">
+            <div class="display-1">📁</div>
+          </div>
+          <h5 class="mb-3">Managing Your Boards</h5>
+          <p>Boards are your project workspaces. Each board contains tasks organized in columns.</p>
+          <ul class="list-unstyled">
+            <li class="mb-2">➕ <strong>Create a Board:</strong> Click "+ Add Board" and give it a name</li>
+            <li class="mb-2">👁️ <strong>Open a Board:</strong> Click on any board card to view its tasks</li>
+            <li class="mb-2">✏️ <strong>Rename/Delete:</strong> Click the 3-dot menu on a board card</li>
+            <li class="mb-2">📊 <strong>Track Progress:</strong> See task counts for each board</li>
+          </ul>
+          <div class="alert alert-info mt-3">
+            <small><strong>Tip:</strong> Create separate boards for different projects to stay organized!</small>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>

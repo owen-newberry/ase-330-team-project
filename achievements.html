@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quest Log — Achievements</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link href="assets/css/style.css" rel="stylesheet">
+</head>
+<body id="page-achievements">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <button class="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#nav"
+        aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="d-flex align-items-center">
+        <a href="account.html"
+          class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex justify-content-center align-items-center"
+          title="Account" style="width:38px;height:38px;padding:0;background:#fff">
+          <img src="assets/images/placeholder-avatar.webp" alt="avatar" class="rounded-circle"
+            style="width:32px;height:32px;">
+        </a>
+      </div>
+
+      <a class="navbar-brand fw-bold ms-3 me-3" href="index.html">Quest Log</a>
+
+      <a href="rewards.html" class="d-flex align-items-center me-3 text-decoration-none">
+        <span class="badge px-3 py-2" style="font-size: 0.9rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" title="Your total points - Click to redeem">
+          <i class="bi bi-star-fill text-warning"></i> <span id="nav-points-value" class="text-white">0</span> <span class="text-white">pts</span>
+        </span>
+      </a>
+
+      <form class="d-none d-md-flex ms-3 me-3" role="search">
+        <input id="nav-search" class="form-control form-control-sm" type="search"
+          placeholder="Search tasks, boards..." aria-label="Search">
+      </form>
+
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
+          <li class="nav-item"><a class="nav-link" href="calendar.html">Calendar</a></li>
+          <li class="nav-item"><a class="nav-link active" href="achievements.html">Achievements</a></li>
+          <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
+        </ul>
+        <button class="btn btn-sm btn-outline-secondary" onclick="showPageTutorial()" title="Show Tutorial">
+          <i class="bi bi-question-circle"></i> Help
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="h3">🏆 Achievements</h1>
+    </div>
+
+    <div class="row g-3">
+      <!-- Progress Overview -->
+      <div class="col-lg-4">
+        <div class="card mb-3" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);">
+          <div class="card-body text-white text-center py-4">
+            <div class="fs-1 mb-2">🏅</div>
+            <h5 class="mb-1">Your Progress</h5>
+            <p class="display-4 fw-bold mb-0" id="achievements-unlocked">0</p>
+            <small class="opacity-75">of <span id="achievements-total">0</span> achievements unlocked</small>
+          </div>
+        </div>
+
+        <div class="card mb-3">
+          <div class="card-body">
+            <h6 class="card-title">📊 Stats</h6>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Tasks Completed:</span>
+              <strong id="ach-stat-completed">0</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Boards Created:</span>
+              <strong id="ach-stat-boards">0</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Points Earned:</span>
+              <strong id="ach-stat-points">0</strong>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Current Streak:</span>
+              <strong id="ach-stat-streak">0 days</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Achievements Grid -->
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title mb-3">All Achievements</h5>
+            <div id="achievements-grid" class="row g-3">
+              <!-- Achievements will be rendered by JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Page Tutorial Modal -->
+  <div class="modal fade" id="pageTutorialModal" tabindex="-1" aria-labelledby="pageTutorialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="pageTutorialModalLabel">🏆 Achievements Guide</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center mb-3">
+            <div class="display-1">🎖️</div>
+          </div>
+          <h5 class="mb-3">How Achievements Work</h5>
+          <p>Earn achievements by completing tasks and using Quest Log regularly!</p>
+          <ul class="list-unstyled">
+            <li class="mb-2">🥉 <strong>Bronze:</strong> Starting tier - complete basic milestones</li>
+            <li class="mb-2">🥈 <strong>Silver:</strong> Intermediate tier - show consistent progress</li>
+            <li class="mb-2">🥇 <strong>Gold:</strong> Master tier - achieve impressive goals</li>
+          </ul>
+          <div class="alert alert-info mt-3">
+            <small><strong>Tip:</strong> Check back regularly to see your progress toward new badges!</small>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
