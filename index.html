@@ -72,6 +72,9 @@
               <a class="nav-link" href="calendar.html">Calendar</a>
             </li>
             <li class="nav-item">
+              <a class="nav-link" href="achievements.html">Achievements</a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" href="rewards.html">Rewards</a>
             </li>
           </ul>
@@ -178,7 +181,10 @@
           <!-- Achievements -->
           <div class="card mb-3">
             <div class="card-body">
-              <h5 class="card-title">🏆 Achievements</h5>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="card-title mb-0">🏆 Achievements</h5>
+                <a href="achievements.html" class="btn btn-sm btn-outline-primary">View All</a>
+              </div>
               <div id="achievements-list" class="d-flex flex-wrap gap-2">
                 <!-- Achievements rendered by JS -->
               </div>
@@ -236,9 +242,9 @@
                   ✓ Click <strong>"Boards"</strong> in the navigation
                 </li>
                 <li class="mb-2">
-                  ✓ Then click <strong>"+ New board"</strong>
+                  ✓ Then click <strong>"+ Add Board"</strong>
                 </li>
-                <li class="mb-2">✓ Give it a name and choose a background</li>
+                <li class="mb-2">✓ Give it a name and start organizing!</li>
               </ul>
             </div>
 
@@ -247,24 +253,23 @@
               <div class="text-center mb-3">
                 <div class="display-1">📝</div>
               </div>
-              <h5 class="mb-3">Add Tasks to Your Board</h5>
+              <h5 class="mb-3">Add & Manage Tasks</h5>
               <p>
                 Each board has three columns: <strong>To Do</strong>,
                 <strong>In Progress</strong>, and <strong>Done</strong>.
               </p>
               <ul class="list-unstyled">
-                <li class="mb-2">✓ Add tasks by typing in the input field</li>
-                <li class="mb-2">✓ Drag tasks between columns as you work</li>
-                <li class="mb-2">
-                  ✓ Add descriptions to keep track of details
-                </li>
+                <li class="mb-2">✓ Click <strong>"+ Add Task"</strong> to create tasks</li>
+                <li class="mb-2">✓ Set due dates, priority, and point values</li>
+                <li class="mb-2">✓ Drag tasks between columns as you progress</li>
+                <li class="mb-2">✓ Click a task to view details or edit</li>
               </ul>
             </div>
 
             <!-- Tutorial Step 3 -->
             <div class="tutorial-step d-none" id="tutorial-step-3">
               <div class="text-center mb-3">
-                <div class="display-1">🏆</div>
+                <div class="display-1">⭐</div>
               </div>
               <h5 class="mb-3">Earn Points & Rewards</h5>
               <p>Complete tasks to earn points and redeem them for rewards!</p>
@@ -273,43 +278,56 @@
                   ✓ Move tasks to <strong>"Done"</strong> column
                 </li>
                 <li class="mb-2">
-                  ✓ Click <strong>"Redeem"</strong> button to earn points
+                  ✓ Click <strong>"Redeem"</strong> to claim your points
                 </li>
                 <li class="mb-2">
-                  ✓ Set goals in the <strong>Rewards</strong> page
+                  ✓ Set personal goals in the <strong>Rewards</strong> page
                 </li>
-                <li class="mb-2">✓ Track your progress toward your goals</li>
+                <li class="mb-2">✓ Claim rewards when you reach your goal!</li>
               </ul>
             </div>
 
             <!-- Tutorial Step 4 -->
             <div class="tutorial-step d-none" id="tutorial-step-4">
               <div class="text-center mb-3">
+                <div class="display-1">🏆</div>
+              </div>
+              <h5 class="mb-3">Unlock Achievements</h5>
+              <p>Earn badges as you use Quest Log and level up your productivity!</p>
+              <ul class="list-unstyled">
+                <li class="mb-2">🥉 <strong>Bronze:</strong> Complete basic milestones</li>
+                <li class="mb-2">🥈 <strong>Silver:</strong> Show consistent progress</li>
+                <li class="mb-2">🥇 <strong>Gold:</strong> Master-level achievements</li>
+                <li class="mb-2">🔥 <strong>Streaks:</strong> Complete tasks daily to build your streak!</li>
+              </ul>
+            </div>
+
+            <!-- Tutorial Step 5 -->
+            <div class="tutorial-step d-none" id="tutorial-step-5">
+              <div class="text-center mb-3">
                 <div class="display-1">🚀</div>
               </div>
               <h5 class="mb-3">You're All Set!</h5>
               <p>
-                You now know the basics of Quest Log. Here are some tips to get
-                started:
+                You now know the basics of Quest Log. Explore these features:
               </p>
               <ul class="list-unstyled">
                 <li class="mb-2">
-                  📊 <strong>Dashboard:</strong> View all your boards and tasks
+                  📊 <strong>Dashboard:</strong> View all your boards and upcoming tasks
                 </li>
                 <li class="mb-2">
-                  🔍 <strong>Search:</strong> Quickly find tasks and boards
+                  📅 <strong>Calendar:</strong> See tasks by due date
                 </li>
                 <li class="mb-2">
-                  👤 <strong>Account:</strong> Manage your profile and settings
+                  🏆 <strong>Achievements:</strong> Track your progress and badges
                 </li>
                 <li class="mb-2">
-                  🎁 <strong>Rewards:</strong> Set goals and track points
+                  🎁 <strong>Rewards:</strong> Set goals and claim rewards
                 </li>
               </ul>
               <div class="alert alert-info mt-3">
                 <small
-                  ><strong>Tip:</strong> You can restart this tutorial anytime
-                  from your Account page.</small
+                  ><strong>Tip:</strong> Click the <i class="bi bi-question-circle"></i> Help button on any page for page-specific guidance!</small
                 >
               </div>
             </div>
@@ -320,7 +338,7 @@
             >
               <div>
                 <span class="badge bg-secondary" id="tutorial-progress"
-                  >1 of 4</span
+                  >1 of 5</span
                 >
               </div>
               <div>

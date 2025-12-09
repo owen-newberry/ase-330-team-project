@@ -42,8 +42,12 @@
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
           <li class="nav-item"><a class="nav-link active" href="calendar.html">Calendar</a></li>
+          <li class="nav-item"><a class="nav-link" href="achievements.html">Achievements</a></li>
           <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
         </ul>
+        <button class="btn btn-sm btn-outline-secondary" onclick="showPageTutorial()" title="Show Help">
+          <i class="bi bi-question-circle"></i> Help
+        </button>
       </div>
     </div>
   </nav>
@@ -108,6 +112,44 @@
       </div>
     </div>
   </main>
+
+  <!-- Page Tutorial Modal -->
+  <div class="modal fade" id="pageTutorialModal" tabindex="-1" aria-labelledby="pageTutorialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="pageTutorialModalLabel">📅 Calendar Guide</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center mb-3">
+            <div class="display-1">🗓️</div>
+          </div>
+          <h5 class="mb-3">Using the Calendar</h5>
+          <p>See all your tasks organized by due date in one view!</p>
+          <ul class="list-unstyled">
+            <li class="mb-2">📆 <strong>Navigate:</strong> Use Previous/Next buttons to browse months</li>
+            <li class="mb-2">🟢 <strong>Today:</strong> Click "Today" to jump to current date</li>
+            <li class="mb-2">🎯 <strong>Click Tasks:</strong> Click any task to go to its board</li>
+          </ul>
+          <hr>
+          <h6>Priority Colors:</h6>
+          <ul class="list-unstyled">
+            <li class="mb-2">🔴 <strong>Urgent:</strong> Red background - needs immediate attention</li>
+            <li class="mb-2">🟠 <strong>High:</strong> Orange background - important tasks</li>
+            <li class="mb-2">🟡 <strong>Medium:</strong> Yellow background - normal priority</li>
+            <li class="mb-2">🟢 <strong>Low:</strong> Green background - can wait</li>
+          </ul>
+          <div class="alert alert-info mt-3">
+            <small><strong>Tip:</strong> Add due dates to your tasks to see them on the calendar!</small>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>

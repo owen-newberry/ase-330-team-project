@@ -37,8 +37,12 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link" href="boards.html">Boards</a></li>
                     <li class="nav-item"><a class="nav-link" href="calendar.html">Calendar</a></li>
+                    <li class="nav-item"><a class="nav-link" href="achievements.html">Achievements</a></li>
                     <li class="nav-item"><a class="nav-link" href="rewards.html">Rewards</a></li>
                 </ul>
+                <button class="btn btn-sm btn-outline-secondary" onclick="showPageTutorial()" title="Show Help">
+                    <i class="bi bi-question-circle"></i> Help
+                </button>
             </div>
         </div>
     </nav>
@@ -216,6 +220,44 @@
             <button type="button" class="btn btn-primary" id="task-save-btn" style="display:none;">Save</button>
           </div>
           <button type="button" class="btn btn-danger" id="task-delete-btn">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page Tutorial Modal -->
+  <div class="modal fade" id="pageTutorialModal" tabindex="-1" aria-labelledby="pageTutorialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="pageTutorialModalLabel">📝 Task Board Guide</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center mb-3">
+            <div class="display-1">📊</div>
+          </div>
+          <h5 class="mb-3">Managing Your Tasks</h5>
+          <p>Use the three columns to track your task progress:</p>
+          <ul class="list-unstyled">
+            <li class="mb-2">📋 <strong>To Do:</strong> Tasks waiting to be started</li>
+            <li class="mb-2">🔄 <strong>In Progress:</strong> Tasks you're currently working on</li>
+            <li class="mb-2">✅ <strong>Done:</strong> Completed tasks ready to redeem</li>
+          </ul>
+          <hr>
+          <h6>Task Actions:</h6>
+          <ul class="list-unstyled">
+            <li class="mb-2">➕ <strong>Add Task:</strong> Click "+ Add Task" to create new tasks</li>
+            <li class="mb-2">✏️ <strong>Edit:</strong> Click a task to view/edit details</li>
+            <li class="mb-2">🎯 <strong>Drag & Drop:</strong> Move tasks between columns</li>
+            <li class="mb-2">⭐ <strong>Redeem:</strong> Click "Redeem" on done tasks to earn points</li>
+          </ul>
+          <div class="alert alert-info mt-3">
+            <small><strong>Tip:</strong> Set priority and point values when creating tasks!</small>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
         </div>
       </div>
     </div>

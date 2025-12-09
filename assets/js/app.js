@@ -29,17 +29,35 @@ const MOTIVATIONAL_QUOTES = [
 ];
 
 // Achievements definitions (used on home/account pages)
+// Now with tiered progression: bronze -> silver -> gold
 const ACHIEVEMENTS = [
-  { id: 'first_task', title: 'First Steps', icon: '🎯', desc: 'Complete your first task', check: (stats) => stats.totalCompleted >= 1 },
-  { id: 'five_tasks', title: 'Getting Started', icon: '⭐', desc: 'Complete 5 tasks', check: (stats) => stats.totalCompleted >= 5 },
-  { id: 'ten_tasks', title: 'On a Roll', icon: '🌟', desc: 'Complete 10 tasks', check: (stats) => stats.totalCompleted >= 10 },
-  { id: 'fifty_tasks', title: 'Task Master', icon: '🏆', desc: 'Complete 50 tasks', check: (stats) => stats.totalCompleted >= 50 },
-  { id: 'first_board', title: 'Organized', icon: '📋', desc: 'Create your first board', check: (stats) => stats.totalBoards >= 1 },
-  { id: 'five_boards', title: 'Multi-tasker', icon: '📚', desc: 'Create 5 boards', check: (stats) => stats.totalBoards >= 5 },
-  { id: 'hundred_points', title: 'Point Collector', icon: '💰', desc: 'Earn 100 points', check: (stats) => stats.totalPoints >= 100 },
-  { id: 'streak_three', title: 'Consistent', icon: '🔥', desc: '3 day streak', check: (stats) => stats.streak >= 3 },
-  { id: 'streak_seven', title: 'Week Warrior', icon: '💪', desc: '7 day streak', check: (stats) => stats.streak >= 7 }
+  // Task completion tiers
+  { id: 'tasks_bronze', title: 'Task Rookie', icon: '🎯', tier: 'bronze', category: 'tasks', desc: 'Complete 1 task', check: (stats) => stats.totalCompleted >= 1 },
+  { id: 'tasks_silver', title: 'Task Veteran', icon: '🎯', tier: 'silver', category: 'tasks', desc: 'Complete 25 tasks', check: (stats) => stats.totalCompleted >= 25 },
+  { id: 'tasks_gold', title: 'Task Master', icon: '🎯', tier: 'gold', category: 'tasks', desc: 'Complete 100 tasks', check: (stats) => stats.totalCompleted >= 100 },
+  
+  // Board creation tiers
+  { id: 'boards_bronze', title: 'Organizer', icon: '📋', tier: 'bronze', category: 'boards', desc: 'Create 1 board', check: (stats) => stats.totalBoards >= 1 },
+  { id: 'boards_silver', title: 'Project Pro', icon: '📋', tier: 'silver', category: 'boards', desc: 'Create 5 boards', check: (stats) => stats.totalBoards >= 5 },
+  { id: 'boards_gold', title: 'Board Boss', icon: '📋', tier: 'gold', category: 'boards', desc: 'Create 10 boards', check: (stats) => stats.totalBoards >= 10 },
+  
+  // Points earning tiers
+  { id: 'points_bronze', title: 'Point Starter', icon: '💰', tier: 'bronze', category: 'points', desc: 'Earn 50 points', check: (stats) => stats.totalPoints >= 50 },
+  { id: 'points_silver', title: 'Point Collector', icon: '💰', tier: 'silver', category: 'points', desc: 'Earn 250 points', check: (stats) => stats.totalPoints >= 250 },
+  { id: 'points_gold', title: 'Point Hoarder', icon: '💰', tier: 'gold', category: 'points', desc: 'Earn 1000 points', check: (stats) => stats.totalPoints >= 1000 },
+  
+  // Streak tiers
+  { id: 'streak_bronze', title: 'Getting Started', icon: '🔥', tier: 'bronze', category: 'streak', desc: '3 day streak', check: (stats) => stats.streak >= 3 },
+  { id: 'streak_silver', title: 'Week Warrior', icon: '🔥', tier: 'silver', category: 'streak', desc: '7 day streak', check: (stats) => stats.streak >= 7 },
+  { id: 'streak_gold', title: 'Streak Legend', icon: '🔥', tier: 'gold', category: 'streak', desc: '30 day streak', check: (stats) => stats.streak >= 30 }
 ];
+
+// Tier styling helpers
+const TIER_STYLES = {
+  bronze: { bg: '#cd7f32', color: '#fff', label: 'Bronze' },
+  silver: { bg: '#c0c0c0', color: '#333', label: 'Silver' },
+  gold: { bg: 'linear-gradient(135deg, #ffd700, #ffec8b)', color: '#333', label: 'Gold' }
+};
 
 function $(s) {
   return document.querySelector(s);
@@ -114,14 +132,111 @@ function renderAchievements() {
   const stats = getStats();
   container.innerHTML = '';
   
-  ACHIEVEMENTS.forEach(ach => {
-    const unlocked = ach.check(stats);
-    const badge = document.createElement('div');
-    badge.className = 'badge-achievement' + (unlocked ? '' : ' locked');
-    badge.title = ach.desc;
-    badge.innerHTML = `<span>${ach.icon}</span><span>${ach.title}</span>`;
-    container.appendChild(badge);
+  // Only show achievements that are actually unlocked
+  const categories = ['tasks', 'boards', 'points', 'streak'];
+  let hasAnyUnlocked = false;
+  
+  categories.forEach(cat => {
+    const catAchievements = ACHIEVEMENTS.filter(a => a.category === cat);
+    // Find highest unlocked tier only - don't show locked ones
+    let toShow = catAchievements.find(a => a.check(stats) && a.tier === 'gold') ||
+                 catAchievements.find(a => a.check(stats) && a.tier === 'silver') ||
+                 catAchievements.find(a => a.check(stats) && a.tier === 'bronze');
+    
+    if (toShow) {
+      hasAnyUnlocked = true;
+      const tierStyle = TIER_STYLES[toShow.tier];
+      const badge = document.createElement('div');
+      badge.className = 'badge-achievement badge-tier-' + toShow.tier;
+      badge.title = `${toShow.desc} (${tierStyle.label})`;
+      badge.innerHTML = `
+        <span class="badge-icon">${toShow.icon}</span>
+        <span class="badge-info">
+          <span class="badge-title">${toShow.title}</span>
+          <span class="badge-tier" style="background: ${tierStyle.bg}; color: ${tierStyle.color};">${tierStyle.label}</span>
+        </span>
+      `;
+      container.appendChild(badge);
+    }
   });
+  
+  // Show message if no achievements unlocked yet
+  if (!hasAnyUnlocked) {
+    container.innerHTML = '<p class="text-muted small mb-0">Complete tasks, create boards, and build streaks to unlock achievements!</p>';
+  }
+}
+
+// Render full achievements page
+function renderAchievementsPage() {
+  const grid = document.getElementById('achievements-grid');
+  const unlockedEl = document.getElementById('achievements-unlocked');
+  const totalEl = document.getElementById('achievements-total');
+  
+  if (!grid) return;
+  
+  const stats = getStats();
+  let unlockedCount = 0;
+  
+  grid.innerHTML = '';
+  
+  // Group by category for better display
+  const categories = [
+    { key: 'tasks', label: 'Task Completion', icon: '✅' },
+    { key: 'boards', label: 'Board Creation', icon: '📋' },
+    { key: 'points', label: 'Points Earning', icon: '⭐' },
+    { key: 'streak', label: 'Daily Streaks', icon: '🔥' }
+  ];
+  
+  categories.forEach(cat => {
+    const catAchievements = ACHIEVEMENTS.filter(a => a.category === cat.key);
+    
+    // Category header
+    const headerCol = document.createElement('div');
+    headerCol.className = 'col-12 mt-3';
+    headerCol.innerHTML = `<h6 class="text-muted">${cat.icon} ${cat.label}</h6>`;
+    grid.appendChild(headerCol);
+    
+    catAchievements.forEach(ach => {
+      const unlocked = ach.check(stats);
+      if (unlocked) unlockedCount++;
+      
+      const tierStyle = TIER_STYLES[ach.tier];
+      const col = document.createElement('div');
+      col.className = 'col-md-4';
+      
+      col.innerHTML = `
+        <div class="card h-100 ${unlocked ? '' : 'opacity-50'}" style="border-left: 4px solid ${tierStyle.bg.includes('gradient') ? '#ffd700' : tierStyle.bg};">
+          <div class="card-body">
+            <div class="d-flex align-items-center mb-2">
+              <span class="fs-3 me-2">${ach.icon}</span>
+              <div>
+                <h6 class="mb-0">${ach.title}</h6>
+                <span class="badge" style="background: ${tierStyle.bg}; color: ${tierStyle.color}; font-size: 0.7rem;">${tierStyle.label}</span>
+              </div>
+              ${unlocked ? '<i class="bi bi-check-circle-fill text-success ms-auto fs-4"></i>' : '<i class="bi bi-lock-fill text-muted ms-auto fs-4"></i>'}
+            </div>
+            <p class="small text-muted mb-0">${ach.desc}</p>
+          </div>
+        </div>
+      `;
+      
+      grid.appendChild(col);
+    });
+  });
+  
+  if (unlockedEl) unlockedEl.textContent = unlockedCount;
+  if (totalEl) totalEl.textContent = ACHIEVEMENTS.length;
+  
+  // Update stats
+  const statCompleted = document.getElementById('ach-stat-completed');
+  const statBoards = document.getElementById('ach-stat-boards');
+  const statPoints = document.getElementById('ach-stat-points');
+  const statStreak = document.getElementById('ach-stat-streak');
+  
+  if (statCompleted) statCompleted.textContent = stats.totalCompleted;
+  if (statBoards) statBoards.textContent = stats.totalBoards;
+  if (statPoints) statPoints.textContent = stats.totalPoints;
+  if (statStreak) statStreak.textContent = stats.streak + ' days';
 }
 
 function renderStreak() {
@@ -596,37 +711,55 @@ function saveStats() {
 }
 
 function checkAndUnlockBadges() {
+  const stats = getStats();
   let newBadges = [];
-  BADGE_DEFINITIONS.forEach(badge => {
-    if (!userBadges.includes(badge.id) && badge.requirement(userStats)) {
-      userBadges.push(badge.id);
-      newBadges.push(badge);
+  
+  // Check all achievements from the ACHIEVEMENTS array
+  ACHIEVEMENTS.forEach(achievement => {
+    if (!userBadges.includes(achievement.id) && achievement.check(stats)) {
+      userBadges.push(achievement.id);
+      newBadges.push({
+        id: achievement.id,
+        name: achievement.title,
+        icon: achievement.icon,
+        tier: achievement.tier,
+        description: achievement.desc
+      });
     }
   });
+  
   if (newBadges.length > 0) {
     saveBadges();
-    newBadges.forEach(badge => {
+    newBadges.forEach((badge, index) => {
       setTimeout(() => {
         fireConfetti();
         showBadgeNotification(badge);
-      }, 300);
+      }, 300 + (index * 500)); // Stagger notifications if multiple unlock at once
     });
   }
 }
 
 function showBadgeNotification(badge) {
+  const tierStyle = TIER_STYLES[badge.tier] || TIER_STYLES.bronze;
   const notification = document.createElement('div');
   notification.className = 'badge-notification';
+  
+  // Determine border color based on tier
+  let borderColor = '#cd7f32'; // bronze default
+  if (badge.tier === 'silver') borderColor = '#c0c0c0';
+  if (badge.tier === 'gold') borderColor = '#ffd700';
+  
   notification.innerHTML = `
     <div class="badge-notification-content">
       <div class="badge-notification-icon">${badge.icon}</div>
       <div class="badge-notification-text">
-        <strong>Badge Unlocked!</strong><br>
+        <strong>Achievement Unlocked!</strong><br>
         <span>${badge.name}</span>
+        <span class="badge-tier tier-${badge.tier}" style="font-size: 0.7rem; margin-left: 8px;">${tierStyle.label}</span>
       </div>
     </div>
   `;
-  notification.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;background:white;padding:1rem;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.2);border:2px solid #ffd700;animation:slideInRight 0.5s ease;';
+  notification.style.cssText = `position:fixed;top:20px;right:20px;z-index:10000;background:white;padding:1rem;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.2);border:2px solid ${borderColor};animation:slideInRight 0.5s ease;`;
   document.body.appendChild(notification);
   setTimeout(() => {
     notification.style.animation = 'slideOutRight 0.5s ease';
@@ -1072,9 +1205,21 @@ function renderUpcomingTasks() {
       dueDateText = `Due in ${daysUntil} day${daysUntil > 1 ? 's' : ''}`;
     }
     
+    // Priority badge HTML
+    const priorityBadge = task.priority 
+      ? `<span class="priority-badge priority-${task.priority}">${task.priority}</span>` 
+      : '';
+    
+    // Points badge HTML
+    const pointsBadge = task.points 
+      ? `<span class="point-badge">⭐ ${task.points}</span>` 
+      : '';
+    
     card.innerHTML = `
       <div class="card-body">
+        ${pointsBadge}
         <h6 class="card-title">${escapeHtml(task.title)}</h6>
+        ${priorityBadge}
         <p class="small ${dueDateClass} mb-1">${dueDateText}</p>
         <p class="small text-muted mb-1"><i class="bi bi-folder"></i> ${escapeHtml(task.boardName)}</p>
         ${task.description ? `<p class="mb-0 small">${escapeHtml(task.description)}</p>` : ''}
@@ -1211,6 +1356,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (boardsEl) boardsEl.textContent = stats.totalBoards;
     if (completedEl) completedEl.textContent = stats.totalCompleted;
     if (streakEl) streakEl.textContent = stats.streak;
+  }
+
+  // Achievements page features
+  if (document.body.id === 'page-achievements') {
+    renderAchievementsPage();
   }
 
   // If this is a board detail page, initialize board UI
@@ -1693,7 +1843,7 @@ function setupTutorialNavigation() {
   const skipBtn = document.getElementById("tutorial-skip");
   const finishBtn = document.getElementById("tutorial-finish");
   const progressBadge = document.getElementById("tutorial-progress");
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   function updateStep() {
     // Hide all steps
@@ -1768,6 +1918,17 @@ function showTutorial() {
   currentTutorialStep = 1;
   setupTutorialNavigation();
   const modal = new bootstrap.Modal(tutorialModal);
+  modal.show();
+}
+
+// Show page-specific tutorial/help modal
+function showPageTutorial() {
+  const pageTutorialModal = document.getElementById('pageTutorialModal');
+  if (!pageTutorialModal) {
+    alert('No help available for this page.');
+    return;
+  }
+  const modal = new bootstrap.Modal(pageTutorialModal);
   modal.show();
 }
 
