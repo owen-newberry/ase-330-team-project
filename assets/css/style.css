@@ -37,8 +37,8 @@ body{
 }
 
 .boards-row { display:flex; gap:1rem; align-items:flex-start; }
-.board-column { flex:1; min-height:320px; max-height:80vh; overflow:auto; }
-.board-list { min-height: 50px; }
+.board-column { flex:1; min-height:300px; }
+.board-list { min-height: 200px; }
 .card-item {
   background: var(--card-bg);
   border-radius:8px;
@@ -115,7 +115,7 @@ body{
 
 /* Board detail specific */
 .board-columns { display:flex; gap:1rem; align-items:flex-start; }
-.board-column { flex:1; min-width:240px; max-height:70vh; overflow:auto; }
+.board-column { flex:1; min-width:240px; }
 .board-column .board-list { min-height:20px; }
 .board-column .card-item { margin-bottom:0.6rem; background:#fff; padding:0.6rem; border-radius:6px; cursor:grab; position:relative; }
 .board-column .card-item.dragging { opacity:0.5; }
@@ -129,11 +129,11 @@ body{
 .urgency-urgent .urgency-label { color: #fd7e14; }
 .urgency-soon .urgency-label { color: #b8860b; }
 
-/* Point badge (top-left) */
+/* Point badge (top-right) */
 .point-badge {
   position: absolute;
   top: -6px;
-  left: -6px;
+  right: -6px;
   background: linear-gradient(135deg, #6f42c1, #8b5e3c);
   color: #fff;
   font-size: 0.65rem;
@@ -216,35 +216,67 @@ body{
 }
 
 /* Calendar view */
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.calendar-header-day {
+  text-align: center;
+  font-weight: 600;
+  padding: 0.5rem;
+  background: var(--bg-spot);
+  border-radius: 4px;
+}
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
+  gap: 0.5rem;
 }
 .calendar-day {
-  min-height: 80px;
-  background: var(--card-bg);
-  border: 1px solid rgba(0,0,0,0.06);
-  padding: 4px;
+  min-height: 100px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 0.5rem;
   font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
 }
-.calendar-day.today { background: rgba(13,110,253,0.1); border-color: #0d6efd; }
-.calendar-day .day-number { font-weight: 600; margin-bottom: 4px; }
+.calendar-day.today {
+  background: #e7f1ff;
+  border-color: #0d6efd;
+}
+.calendar-day.other-month {
+  opacity: 0.4;
+}
+.calendar-day .day-number {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
 .calendar-task {
-  background: var(--accent);
-  color: #fff;
+  font-size: 0.7rem;
   padding: 2px 4px;
   border-radius: 3px;
-  font-size: 0.65rem;
   margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
+.calendar-task:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.calendar-task.priority-urgent { background: #f8d7da; color: #721c24; border-left: 3px solid #dc3545; }
+.calendar-task.priority-high { background: #ffe5d0; color: #7c4a03; border-left: 3px solid #fd7e14; }
+.calendar-task.priority-medium { background: #fff3cd; color: #856404; border-left: 3px solid #ffc107; }
+.calendar-task.priority-low { background: #d4edda; color: #155724; border-left: 3px solid #28a745; }
 .calendar-task-time {
   font-weight: 700;
   opacity: 0.9;
@@ -289,3 +321,192 @@ body{
   transform: scale(1.1);
   box-shadow: 0 6px 20px rgba(0,0,0,0.25);
 }
+.board-column .card-item { margin-bottom:0.6rem; background:#fff; padding:0.6rem; border-radius:6px; cursor:grab; position:relative; border-left: 4px solid #6c757d; }
+.board-column .card-item.dragging { opacity:0.5; }
+.board-column.drag-over { outline:2px dashed rgba(0,0,0,0.08); }
+
+/* Priority colors for tasks */
+.card-item.priority-low { border-left-color: #28a745; }
+.card-item.priority-medium { border-left-color: #ffc107; }
+.card-item.priority-high { border-left-color: #fd7e14; }
+.card-item.priority-urgent { border-left-color: #dc3545; animation: pulse-urgent 2s infinite; }
+
+@keyframes pulse-urgent {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+}
+
+/* Priority badge styling */
+.priority-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.priority-badge.low { background-color: #d4edda; color: #155724; }
+.priority-badge.medium { background-color: #fff3cd; color: #856404; }
+.priority-badge.high { background-color: #ffe5d0; color: #cc5200; }
+.priority-badge.urgent { background-color: #f8d7da; color: #721c24; }
+
+/* Due date styling */
+.due-date {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.due-date.overdue {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.due-date.due-soon {
+  color: #fd7e14;
+  font-weight: 600;
+}
+
+/* Badge system */
+.badge-item {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.5rem;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  min-width: 80px;
+  transition: all 0.3s ease;
+}
+
+.badge-item.unlocked {
+  border-color: #ffd700;
+  background: linear-gradient(145deg, #fff9e6, #fffbf0);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.badge-item .badge-icon {
+  font-size: 2rem;
+  margin-bottom: 0.25rem;
+}
+
+.badge-item .badge-name {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.badge-item.locked {
+  opacity: 0.4;
+  filter: grayscale(100%);
+}
+
+/* Motivational elements */
+.streak-counter {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.level-progress {
+  position: relative;
+  height: 24px;
+  background: #e9ecef;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.level-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.5s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Board color previews in gallery */
+.boards-gallery .card {
+  position: relative;
+  overflow: hidden;
+}
+
+.boards-gallery .card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--accent);
+}
+
+.boards-gallery .card[data-board-color]::before {
+  background: var(--board-color, var(--accent));
+}
+
+/* Confetti button effect */
+@keyframes celebrate {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.celebrate-btn {
+  animation: celebrate 0.3s ease;
+}
+
+/* Badge notification animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+.badge-notification {
+  font-family: 'Roboto Slab', Georgia, serif;
+}
+
+.badge-notification-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.badge-notification-icon {
+  font-size: 3rem;
+}
+
+.badge-notification-text strong {
+  font-size: 0.9rem;
+  color: var(--accent-dark);
+}
+
+.badge-notification-text span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+
