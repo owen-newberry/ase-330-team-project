@@ -547,6 +547,7 @@ function earnPoints(amount) {
   rewards.points = Math.round(rewards.points);
   saveRewards();
   updateRewardsUI();
+  checkAndUnlockBadges(); // Check for point-related achievements
 }
 
 function tryRedeem(cost) {
@@ -661,6 +662,7 @@ function claimGoal(id) {
     updateRewardsUI();
     renderClaimedRewards();
     updateRewardsStats();
+    checkAndUnlockBadges(); // Check for reward-related achievements
     fireConfetti();
     alert("🎉 Goal claimed: " + g.title + " — " + g.target + " points spent!");
   } else {
@@ -1127,6 +1129,7 @@ function setupForm() {
     const b = { id: id(), name, updatedAt: Date.now(), background, cards: [] };
     boards.unshift(b);
     save();
+    checkAndUnlockBadges(); // Check for board-related achievements
     // reset form and hide modal
     form.reset();
     const modalEl = document.getElementById("newBoardModal");
@@ -1246,6 +1249,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadRewards();
   updatePointsDisplay();
   updateBadgesUI();
+  
+  // Check for any new achievements on page load (works on all pages)
+  checkAndUnlockBadges();
   
   // Initialize upcoming tasks on homepage
   if (document.getElementById("upcoming-tasks-container")) {
@@ -1661,6 +1667,18 @@ function renderBoardColumns(board){
           });
         }
         btnWrap.appendChild(btn);
+        
+        // add edit button for done cards
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-sm btn-outline-secondary';
+        editBtn.innerHTML = '<i class="bi bi-pencil"></i>';
+        editBtn.title = 'Edit task';
+        editBtn.addEventListener('click', (e)=>{
+          e.preventDefault(); e.stopPropagation();
+          openTaskModal(board, card.id, true); // true = open in edit mode
+        });
+        btnWrap.appendChild(editBtn);
+        
         // add a remove button next to redeem so users can delete completed tasks
         const removeBtn = document.createElement('button');
         removeBtn.className = 'btn btn-sm btn-danger remove-card';
@@ -1685,7 +1703,19 @@ function renderBoardColumns(board){
       // add remove button for non-done cards
       if (col !== 'done'){
         const ctrlWrap = document.createElement('div');
-        ctrlWrap.className = 'mt-2 d-flex justify-content-end';
+        ctrlWrap.className = 'mt-2 d-flex justify-content-between';
+        
+        // Edit button
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-sm btn-outline-secondary';
+        editBtn.innerHTML = '<i class="bi bi-pencil"></i> Edit';
+        editBtn.addEventListener('click', (e)=>{
+          e.preventDefault(); e.stopPropagation();
+          openTaskModal(board, card.id, true); // true = open in edit mode
+        });
+        ctrlWrap.appendChild(editBtn);
+        
+        // Remove button
         const rm = document.createElement('button');
         rm.className = 'btn btn-sm btn-danger remove-card';
         rm.textContent = 'Remove';
@@ -1935,7 +1965,7 @@ function showPageTutorial() {
 // --- Task details / edit / delete modal handlers ---
 function findCard(board, cardId){ return (board.cards||[]).find(c=>c.id===cardId); }
 
-function openTaskModal(board, cardId){
+function openTaskModal(board, cardId, startInEditMode = false){
   const card = findCard(board, cardId);
   if (!card) return;
   const modalEl = document.getElementById('taskDetailsModal');
@@ -1959,12 +1989,24 @@ function openTaskModal(board, cardId){
     catch(e){ dueEl.textContent = ''; dueEl.style.display = 'none'; }
   } else { dueEl.textContent = ''; dueEl.style.display = 'none'; }
 
-  // prepare edit form (hidden by default)
-  document.getElementById('task-edit-form').style.display = 'none';
-  document.getElementById('task-details-view').style.display = '';
-  document.getElementById('task-edit-toggle').style.display = '';
+  // prepare edit form (hidden by default unless startInEditMode is true)
+  const editForm = document.getElementById('task-edit-form');
+  const detailsView = document.getElementById('task-details-view');
+  const editToggle = document.getElementById('task-edit-toggle');
+  const saveBtn = document.getElementById('task-save-btn');
+  
+  if (startInEditMode) {
+    editForm.style.display = '';
+    detailsView.style.display = 'none';
+    editToggle.textContent = 'Cancel';
+    saveBtn.style.display = '';
+  } else {
+    editForm.style.display = 'none';
+    detailsView.style.display = '';
+    editToggle.textContent = 'Edit';
+    saveBtn.style.display = 'none';
+  }
   document.getElementById('task-delete-btn').style.display = '';
-  document.getElementById('task-save-btn').style.display = 'none';
 
   // store current card id and board id on modal element for handlers
   modalEl.dataset.cardId = card.id;
@@ -1972,9 +2014,9 @@ function openTaskModal(board, cardId){
 
   // wire edit toggle
   const toggle = document.getElementById('task-edit-toggle');
-  const saveBtn = document.getElementById('task-save-btn');
+  const saveBtnEl = document.getElementById('task-save-btn');
   const deleteBtn = document.getElementById('task-delete-btn');
-  const editForm = document.getElementById('task-edit-form');
+  const editFormEl = document.getElementById('task-edit-form');
   const titleInput = document.getElementById('task-edit-title');
   const descInput = document.getElementById('task-edit-desc');
   const dateInput = document.getElementById('task-edit-date');
@@ -1986,8 +2028,8 @@ function openTaskModal(board, cardId){
   // ensure previous listeners are not duplicated: replace by cloning the node
   const newToggle = toggle.cloneNode(true);
   toggle.parentNode.replaceChild(newToggle, toggle);
-  const newSave = saveBtn.cloneNode(true);
-  saveBtn.parentNode.replaceChild(newSave, saveBtn);
+  const newSave = saveBtnEl.cloneNode(true);
+  saveBtnEl.parentNode.replaceChild(newSave, saveBtnEl);
   const newDelete = deleteBtn.cloneNode(true);
   deleteBtn.parentNode.replaceChild(newDelete, deleteBtn);
 
@@ -2014,16 +2056,16 @@ function openTaskModal(board, cardId){
 
   // toggle handler
   newToggle.addEventListener('click', ()=>{
-    const showingEdit = editForm.style.display !== 'none';
+    const showingEdit = editFormEl.style.display !== 'none';
     if (!showingEdit){
       // show edit
       document.getElementById('task-details-view').style.display = 'none';
-      editForm.style.display = '';
+      editFormEl.style.display = '';
       newToggle.textContent = 'Cancel';
       newSave.style.display = '';
     } else {
       // cancel edit
-      editForm.style.display = 'none';
+      editFormEl.style.display = 'none';
       document.getElementById('task-details-view').style.display = '';
       newToggle.textContent = 'Edit';
       newSave.style.display = 'none';
@@ -2054,7 +2096,7 @@ function openTaskModal(board, cardId){
     renderBoardColumns(b);
     // update modal view back to display mode
     document.getElementById('task-details-view').style.display = '';
-    editForm.style.display = 'none';
+    editFormEl.style.display = 'none';
     newToggle.textContent = 'Edit';
     newSave.style.display = 'none';
     // refresh populated fields
